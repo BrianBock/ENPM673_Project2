@@ -8,7 +8,7 @@ import time
 
 
 write_to_video=False
-data_set=1
+data_set=2
 
 
 # Define the codec and initialize the output file
@@ -31,11 +31,20 @@ def getFrame(data_set,imagenum):
 		return image
 
 	elif data_set==2:
-		filepath="media/Problem2/data_2/challenge_video.mp4"
+		videopath="media/Problem2/data_2/challenge_video.mp4"
+		video = cv2.VideoCapture(videopath) 
+		# move the video to the start frame and adjust the counter
+		video.set(1,imagenum)
+		ret, frame = video.read() # ret is false if the video cannot be read
+		if ret:
+			return frame
+		else:
+			print("Frame "+str(imagenum)+" exceeds video length or you've reached the end of video. Quitting...")
+			exit()
 
 
 
-image=getFrame(1,50)
+image=getFrame(data_set,500)
 cv2.imshow("Image",image)
 cv2.waitKey(0)
 
