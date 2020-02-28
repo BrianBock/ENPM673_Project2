@@ -3,12 +3,12 @@
 import numpy as np
 import cv2
 import time
-
+from p2functions import*
 
 
 
 write_to_video=False
-data_set=2
+data_set=1
 
 
 # Define the codec and initialize the output file
@@ -23,28 +23,17 @@ if write_to_video:
 
 
 
-def getFrame(data_set,imagenum):
-	if data_set==1:
-		filepath="media/Problem2/data_1/data/"
-		imagepath=filepath+('0000000000'+str(imagenum))[-10:]+'.png'
-		image=cv2.imread(imagepath)
-		return image
-
-	elif data_set==2:
-		videopath="media/Problem2/data_2/challenge_video.mp4"
-		video = cv2.VideoCapture(videopath) 
-		# move the video to the start frame and adjust the counter
-		video.set(1,imagenum)
-		ret, frame = video.read() # ret is false if the video cannot be read
-		if ret:
-			return frame
-		else:
-			print("Frame "+str(imagenum)+" exceeds video length or you've reached the end of video. Quitting...")
-			exit()
 
 
 
-image=getFrame(data_set,500)
+
+image=getFrame(data_set,50)
+
+pts=(514,318),(195,512),(939,512), (767,320) #region of road
+
+# H=homography(pts,500)
+# square_road=fastwarp(image,H,500,500)
+
 cv2.imshow("Image",image)
 cv2.waitKey(0)
 
