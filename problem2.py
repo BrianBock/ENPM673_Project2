@@ -136,20 +136,25 @@ for i,x in enumerate(inds[1]):
 		leftlaney.append(y)
 
 line=np.polyfit(leftlanex,leftlaney,2)
-xpts=np.linspace(0,dst_width,1000)
-ypts=np.array([])
+xpts=np.linspace(0,dst_width)
+pts=[]
 for x in xpts:
-	np.append(ypts,(line[0]*x**2+line[1]*x+line[2]))
+	y=int(line[0]*x**2+line[1]*x+line[2])
+	# print(x,y)
+	pts.append((x,y))
+	# print(pts)
+print(pts)
 
-xpts=np.int32(xpts)
-ypts=np.int32(ypts)
-cv2.polylines(square_road,[xpts,ypts],True,(0,255,255))
-print(line)
+pts=np.array(pts,np.int32)
+pts=pts.reshape((-1,1,2))
+
+mylines=cv2.polylines(square_road,[pts],False,(0,0,255),15)
+
 
 # line=cv2.line(square_road,)
 # cv2.imshow("Line",line)
 
-# cv2.imshow("Image",img_blur)
+cv2.imshow("Lines",mylines)
 cv2.waitKey(0)
 
 
