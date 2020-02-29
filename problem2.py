@@ -117,25 +117,25 @@ for x in inds[1]:
 # 			count[x]+=1
 
 
-# plt.plot(whitebin,'.')
-# #plt.plot(x,y,label='Original Data')
-# plt.xlabel('X Bins')
-# plt.ylabel('White count')
-# plt.title("My Histogram")
-# plt.show()
+plt.plot(whitebin,'.')
+#plt.plot(x,y,label='Original Data')
+plt.xlabel('X Bins')
+plt.ylabel('White count')
+plt.title("My Histogram")
+plt.show()
 
 maxbinstep=whitebin.index(max(whitebin))
 print(maxbinstep)
 
-leftlanex=[]
-leftlaney=[]
+rightlanex=[]
+rightlaney=[]
 for i,x in enumerate(inds[1]):
 	y=inds[0][i]
 	if(x<(maxbinstep*stepsize)):
-		leftlanex.append(x)
-		leftlaney.append(y)
+		rightlanex.append(x)
+		rightlaney.append(y)
 
-line=np.polyfit(leftlanex,leftlaney,2)
+line=np.polyfit(rightlanex,rightlaney,2)
 xpts=np.linspace(0,dst_width)
 pts=[]
 for x in xpts:
