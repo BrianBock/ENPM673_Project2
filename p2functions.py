@@ -35,11 +35,14 @@ def homography(road_points,h,w):
         x.append(point[0])
         y.append(point[1])
 
-    dr = x[2]-x[3]
+    xp = [0,w,w,0]
+    yp = [0,0,h,h]
 
-    w1 = w - x[3]
-    xp=[w1,w1+dr,w1+dr,w1]
-    yp=[0,0,h,h]
+    # dr = x[2]-x[3]
+
+    # w1 = w - x[3]
+    # xp=[w1,w1+dr,w1+dr,w1]
+    # yp=[0,0,h,h]
 
     n = 9
     m = 8

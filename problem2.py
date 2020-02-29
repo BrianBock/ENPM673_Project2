@@ -5,7 +5,8 @@ import cv2
 import time
 import imutils
 from p2functions import*
-
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 write_to_video=False
@@ -32,27 +33,31 @@ if write_to_video:
 
 
 
-image=getFrame(data_set,50)
+image=getFrame(data_set,60)
 
 
-
+dst_height = 500
+dst_width = 1000
 
 # Define the HSV bounds that make the just road lines really clear (determined experimentally)
 if data_set==1:
 	colorLower = (0, 0, 201)
 	colorUpper = (255, 49, 255)
-	pts=[(470,318),(770,320),(950,512),(140,512)] #region of road
+	src_pts=np.float32([(570,275),(715,275),(950,512),(140,512)]).reshape(-1,1,2) #region of road #(0,225),(1392,225)
+	dst_pts=np.float32([(.25*dst_width,0),(.75*dst_width,0),(.75*dst_width,dst_height),(.25*dst_width,dst_height)]).reshape(-1,1,2)#,(0,0),(dst_width,0)
 
 elif data_set==2:
 	colorLower = (0, 123, 183)
 	colorUpper = (255, 255, 255)
 
-height = 2000
-tot_width = image.shape[1]
-H=homography(pts,height,tot_width)
+
+
+#H=homography(pts,height,width)
+H=cv2.findHomography(src_pts,dst_pts)[0]
+print(H[0])
 cv2.imshow("Road-before",image)
 
-square_road=fastwarp(np.linalg.inv(H),image,height,image.shape[1]*3)
+square_road=fastwarp(np.linalg.inv(H),image,dst_height,dst_width)
 cv2.imshow("Road-after",square_road)
 cv2.waitKey(0)
 
@@ -66,23 +71,86 @@ cv2.waitKey(0)
 # cv2.waitKey(0)
 
 # Convert the image to HSV space
-# hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+hsv_image = cv2.cvtColor(square_road, cv2.COLOR_BGR2HSV)
 
-# # Thresh the image based on the HSV max/min values
-# hsv_binary_image=cv2.inRange(hsv_image, colorLower, colorUpper)
+# Thresh the image based on the HSV max/min values
+hsv_binary_image=cv2.inRange(hsv_image, colorLower, colorUpper)
+#cv2.imshow("HSV",hsv_binary_image)
 
-# # Blur the image a little bit
-# img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
+# Blur the image a little bit
+img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
 
-# # Find the edges
-# all_cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+# Find the edges
+#edges = cv2.Canny(img_blur, 5, 10)
+all_cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-# # Draw the edges
-# edges=cv2.drawContours(image.copy(),all_cnts,-1,(0,0,255), 5)
-# cv2.imshow("Edges", imutils.resize(edges,width=640))
+# Draw the edges
+blank=np.zeros((square_road.shape[0],square_road.shape[1]),np.uint8)
+filledContours=cv2.drawContours(blank,all_cnts,-1,(255), -1)
+cv2.imshow("filledContours", imutils.resize(filledContours,width=1000))
+
+inds=np.nonzero(filledContours)
+# print(inds)
+# for x in inds[1]:
+# 	if len(count_array)%10:
+# 		count=0
+whitebin=[]
+stepsize=200
+steps=dst_width//stepsize
+for i in range (steps):
+	whitebin.append(0)
+
+for x in inds[1]:
+	i=0
+	for x_c in range (stepsize,dst_width,stepsize):
+		if(x<x_c):
+			whitebin[i]+=1
+			break
+		i+=1
+
+# print(whitebin)
+# stepsize=10
+# for x in range(0,dst_width,stepsize):
+# 	count=0
+# 	for y in range(0,dst_height):
+# 		if filledContours[y][x]==255:
+# 			count[x]+=1
+
+
+# plt.plot(whitebin,'.')
+# #plt.plot(x,y,label='Original Data')
+# plt.xlabel('X Bins')
+# plt.ylabel('White count')
+# plt.title("My Histogram")
+# plt.show()
+
+maxbinstep=whitebin.index(max(whitebin))
+print(maxbinstep)
+
+leftlanex=[]
+leftlaney=[]
+for i,x in enumerate(inds[1]):
+	y=inds[0][i]
+	if(x<(maxbinstep*stepsize)):
+		leftlanex.append(x)
+		leftlaney.append(y)
+
+line=np.polyfit(leftlanex,leftlaney,2)
+xpts=np.linspace(0,dst_width,1000)
+ypts=np.array([])
+for x in xpts:
+	np.append(ypts,(line[0]*x**2+line[1]*x+line[2]))
+
+xpts=np.int32(xpts)
+ypts=np.int32(ypts)
+cv2.polylines(square_road,[xpts,ypts],True,(0,255,255))
+print(line)
+
+# line=cv2.line(square_road,)
+# cv2.imshow("Line",line)
 
 # cv2.imshow("Image",img_blur)
-# cv2.waitKey(0)
+cv2.waitKey(0)
 
 
 
