@@ -47,10 +47,13 @@ elif data_set==2:
 	colorLower = (0, 123, 183)
 	colorUpper = (255, 255, 255)
 
+height = 2000
+tot_width = image.shape[1]
+H=homography(pts,height,tot_width)
+cv2.imshow("Road-before",image)
 
-H=homography(pts,500)
-square_road=fastwarp(np.linalg.inv(H),image,500,500)
-cv2.imshow("Road",square_road)
+square_road=fastwarp(np.linalg.inv(H),image,height,image.shape[1]*3)
+cv2.imshow("Road-after",square_road)
 cv2.waitKey(0)
 
 
@@ -63,23 +66,23 @@ cv2.waitKey(0)
 # cv2.waitKey(0)
 
 # Convert the image to HSV space
-hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+# hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-# Thresh the image based on the HSV max/min values
-hsv_binary_image=cv2.inRange(hsv_image, colorLower, colorUpper)
+# # Thresh the image based on the HSV max/min values
+# hsv_binary_image=cv2.inRange(hsv_image, colorLower, colorUpper)
 
-# Blur the image a little bit
-img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
+# # Blur the image a little bit
+# img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
 
-# Find the edges
-all_cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+# # Find the edges
+# all_cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-# Draw the edges
-edges=cv2.drawContours(image.copy(),all_cnts,-1,(0,0,255), 5)
-cv2.imshow("Edges", imutils.resize(edges,width=640))
+# # Draw the edges
+# edges=cv2.drawContours(image.copy(),all_cnts,-1,(0,0,255), 5)
+# cv2.imshow("Edges", imutils.resize(edges,width=640))
 
-cv2.imshow("Image",img_blur)
-cv2.waitKey(0)
+# cv2.imshow("Image",img_blur)
+# cv2.waitKey(0)
 
 
 

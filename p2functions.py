@@ -28,16 +28,18 @@ def getFrame(data_set,imagenum):
 
 
 
-def homography(corners,dim):
+def homography(road_points,h,w):
     #Define the eight points to compute the homography matrix
-    x = []
-    y = []
-    for point in corners:
+    x,y = [],[]
+    for point in road_points:
         x.append(point[0])
         y.append(point[1])
-    #ccw corners
-    xp=[0,dim,dim,0]
-    yp=[0,0,dim,dim]
+
+    dr = x[2]-x[3]
+
+    w1 = w - x[3]
+    xp=[w1,w1+dr,w1+dr,w1]
+    yp=[0,0,h,h]
 
     n = 9
     m = 8
@@ -92,10 +94,10 @@ def warp(H,src,h,w):
     # generate new image
     new_img = np.zeros((h,w,3),dtype="uint8")
 
-    map_x[map_x>=src.shape[1]] = -1
-    map_x[map_x<0] = -1
-    map_y[map_y>=src.shape[0]] = -1
-    map_x[map_y<0] = -1
+    # map_x[map_x>=src.shape[1]] = -1
+    # map_x[map_x<0] = -1
+    # map_y[map_y>=src.shape[0]] = -1
+    # map_x[map_y<0] = -1
 
     for new_x in range(w):
         for new_y in range(h):
