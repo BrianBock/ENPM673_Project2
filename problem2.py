@@ -54,12 +54,12 @@ elif data_set==2:
 
 #H=homography(pts,height,width)
 H=cv2.findHomography(src_pts,dst_pts)[0]
-print(H[0])
-cv2.imshow("Road-before",image)
+# print(H[0])
+# cv2.imshow("Road-before",image)
 
 square_road=fastwarp(np.linalg.inv(H),image,dst_height,dst_width)
-cv2.imshow("Road-after",square_road)
-cv2.waitKey(0)
+# cv2.imshow("Road-after",square_road)
+# cv2.waitKey(0)
 
 
 # # Mask the top half of the video so only the road half remains
@@ -87,7 +87,7 @@ all_cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX
 # Draw the edges
 blank=np.zeros((square_road.shape[0],square_road.shape[1]),np.uint8)
 filledContours=cv2.drawContours(blank,all_cnts,-1,(255), -1)
-cv2.imshow("filledContours", imutils.resize(filledContours,width=1000))
+# cv2.imshow("filledContours", imutils.resize(filledContours,width=1000))
 
 inds=np.nonzero(filledContours)
 # print(inds)
@@ -125,7 +125,7 @@ plt.title("My Histogram")
 plt.show()
 
 maxbinstep=whitebin.index(max(whitebin))
-print(maxbinstep)
+# print(maxbinstep)
 
 rightlanex=[]
 rightlaney=[]
@@ -135,15 +135,16 @@ for i,x in enumerate(inds[1]):
 		rightlanex.append(x)
 		rightlaney.append(y)
 
-line=np.polyfit(rightlanex,rightlaney,2)
-xpts=np.linspace(0,dst_width)
+line=np.polyfit(rightlanex,rightlaney,1)
+print(line)
+#xpts=np.linspace(0,dst_width)
 pts=[]
-for x in xpts:
-	y=int(line[0]*x**2+line[1]*x+line[2])
+for x in inds[1]:
+	y=int(line[0]*x+line[1])
 	# print(x,y)
 	pts.append((x,y))
 	# print(pts)
-print(pts)
+#print(pts)
 
 pts=np.array(pts,np.int32)
 pts=pts.reshape((-1,1,2))
