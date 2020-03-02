@@ -117,40 +117,85 @@ for x in inds[1]:
 # 			count[x]+=1
 
 
-plt.plot(whitebin,'.')
-#plt.plot(x,y,label='Original Data')
-plt.xlabel('X Bins')
-plt.ylabel('White count')
-plt.title("My Histogram")
-plt.show()
+# plt.plot(whitebin,'.')
+# #plt.plot(x,y,label='Original Data')
+# plt.xlabel('X Bins')
+# plt.ylabel('White count')
+# plt.title("My Histogram")
+# plt.show()
 
-maxbinstep=whitebin.index(max(whitebin))
-# print(maxbinstep)
+max_bin1=whitebin.index(max(whitebin))
+whitebin[max_bin1] = 0
+max_bin2=whitebin.index(max(whitebin))
+# print(max_bin1)
+xstart_r = max_bin1*stepsize
+xend_r = xstart_r+stepsize
+
+xstart_l = max_bin2*stepsize
+xend_l = xstart_l+stepsize
 
 rightlanex=[]
 rightlaney=[]
 for i,x in enumerate(inds[1]):
 	y=inds[0][i]
-	if(x<(maxbinstep*stepsize)):
+	if(x>xstart_r and x<xend_r):
 		rightlanex.append(x)
 		rightlaney.append(y)
 
-line=np.polyfit(rightlanex,rightlaney,1)
-print(line)
+leftlanex=[]
+leftlaney=[]
+for i,x in enumerate(inds[1]):
+    y=inds[0][i]
+    if(x>xstart_l and x<xend_l):
+        leftlanex.append(x)
+        leftlaney.append(y)
+
+line1=np.polyfit(rightlaney,rightlanex,1)
+line2=np.polyfit(leftlaney,leftlanex,1)
+
 #xpts=np.linspace(0,dst_width)
-pts=[]
-for x in inds[1]:
-	y=int(line[0]*x+line[1])
-	# print(x,y)
-	pts.append((x,y))
+# pts=[]
+# for x in inds[1]:
+# 	y=int(line[0]*x+line[1])
+# 	# print(x,y)
+# 	pts.append((x,y))
 	# print(pts)
 #print(pts)
+
+plt.plot(rightlaney,rightlanex,'ro')
+plt.plot(leftlaney,leftlanex,'bo')
+
+y = np.linspace(0,dst_height,50)
+x = y*line1[0]+line1[1]
+plt.plot(y,x)
+
+pts = []
+for i in range(len(x)):
+    pts.append((x[i],y[i]))
 
 pts=np.array(pts,np.int32)
 pts=pts.reshape((-1,1,2))
 
-mylines=cv2.polylines(square_road,[pts],False,(0,0,255),15)
+mylines=cv2.polylines(square_road,[pts],False,(0,0,255),5)
 
+y = np.linspace(0,dst_height,50)
+x = y*line2[0]+line2[1]
+plt.plot(y,x)
+
+pts = []
+for i in range(len(x)):
+    pts.append((x[i],y[i]))
+
+pts=np.array(pts,np.int32)
+pts=pts.reshape((-1,1,2))
+
+mylines=cv2.polylines(square_road,[pts],False,(0,255,0),5)
+
+plt.xlabel('x')
+plt.ylabel('y')
+plt.ylim((0, dst_width)) 
+plt.xlim((0, dst_height))
+plt.show()
 
 # line=cv2.line(square_road,)
 # cv2.imshow("Line",line)
