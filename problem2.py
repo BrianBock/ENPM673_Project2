@@ -191,8 +191,8 @@ pts=pts.reshape((-1,1,2))
 
 mylines=cv2.polylines(square_road,[pts],False,(0,255,0),5)
 
-plt.xlabel('x')
-plt.ylabel('y')
+plt.xlabel('y')
+plt.ylabel('x')
 plt.ylim((0, dst_width)) 
 plt.xlim((0, dst_height))
 plt.show()
