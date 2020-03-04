@@ -7,7 +7,7 @@ from p2functions import*
 write_to_video = False
 show_output = True
 
-for k in range(1):
+for k in range(300):
 
     if write_to_video and k == 0:
         print('Writing to Video, Please Wait')
@@ -51,8 +51,8 @@ for k in range(1):
     colorLower = (0, 0, 171)
     colorUpper = (91, 255, 216)
     hsv_binary_image=cv2.inRange(hsv_image, colorLower, colorUpper)
-    cv2.imshow('Filled Contours',hsv_binary_image)
-    cv2.waitKey(0)
+    # cv2.imshow('Filled Contours',hsv_binary_image)
+    # cv2.waitKey(0)
 
     # Blur the image a little bit
     img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
