@@ -7,19 +7,22 @@ from p2functions import*
 write_to_video = False
 show_output = True
 
-for k in range(303):
+for k in range(1):
 
     if write_to_video and k == 0:
+        print('Writing to Video, Please Wait')
+        print('Frame ' + str(k+1) + ' of ?')
+        image=getFrame(2,k)
+        k += 1
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
         frame_size = (image.shape[1], image.shape[0])
         videoname='lane_detection'
         fps_out = 15
         out = cv2.VideoWriter(str(videoname)+".mp4", fourcc, fps_out, frame_size)
-        print('Writing to Video, Please Wait')
-
-    print('Frame ' + str(k+1) + ' of ?')
-    image=getFrame(2,k)
-    k += 1
+    else:
+        print('Frame ' + str(k+1) + ' of ?')
+        image=getFrame(2,k)
+        k += 1
 
     dst_h = 500
     dst_w = 500
@@ -48,8 +51,8 @@ for k in range(303):
     colorLower = (0, 0, 171)
     colorUpper = (91, 255, 216)
     hsv_binary_image=cv2.inRange(hsv_image, colorLower, colorUpper)
-    # cv2.imshow('Filled Contours',hsv_binary_image)
-    # cv2.waitKey(0)
+    cv2.imshow('Filled Contours',hsv_binary_image)
+    cv2.waitKey(0)
 
     # Blur the image a little bit
     img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
@@ -70,17 +73,17 @@ for k in range(303):
     # Create a histogram of the number of nonzero pixels
     num_pixels,bins = np.histogram(inds[1],bins=dst_w,range=(0,dst_w))
 
-    peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,50))
+    peaks = []
+    peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
     
     peak_vals = []
     for peak in peaks:
         peak_vals.append(num_pixels[peak])
-        plt.vlines(peak,0,dst_h)
         
     max1_ind = peak_vals.index(max(peak_vals))
     temp = peak_vals.copy()
     temp[max1_ind] = 0
-    max2_ind = peak_vals.index(max(temp))
+    max2_ind = temp.index(max(temp))
 
     peak1 = peaks[max1_ind]
     peak2 = peaks[max2_ind]
@@ -169,6 +172,7 @@ for k in range(303):
     if write_to_video:
         out.write(overlay)
 
+    # cv2.waitKey(0)
 
 if write_to_video:
     out.release()
