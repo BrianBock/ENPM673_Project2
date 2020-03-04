@@ -13,12 +13,13 @@ def getFrame(data_set,imagenum):
         return image
 
     elif data_set==2:
-        videopath="media/Problem2/data_2/challenge_1video.mp4"
+        videopath="media/Problem2/data_2/challenge_video.mp4"
         video = cv2.VideoCapture(videopath)
         # move the video to the start frame and adjust the counter
         video.set(1,imagenum)
         ret, frame = video.read() # ret is false if the video cannot be read
         if ret:
+            # cv2.imwrite('frame.jpg',frame)
             return frame
         else:
             print("Frame "+str(imagenum)+" exceeds video length or you've reached the end of video. Quitting...")
