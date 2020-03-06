@@ -1,13 +1,17 @@
 
+import cv2
+from Road import Road
+
+
 data_set=1
 dst_size=(500,500)
 write_to_video=False
+initial_frame_num=0
+count=initial_frame_num
+
 
 # Construct object Road
-road=Road(dst_size,data_set,0)
-
-# Read in the frame
-
+road=Road(dst_size,data_set,initial_frame_num)
 
 # Prepare video output
 if write_to_video and k == 0:
@@ -18,29 +22,33 @@ if write_to_video and k == 0:
     out = cv2.VideoWriter(str(videoname)+".mp4", fourcc, fps_out, frame_size)
     print('Writing to Video, Please Wait')
 
-# Road Region
 
-# How the source corners will match up in the destination image
+while road.video:
 
-# Find the homography matrix for the conversion
+    # Warp the image
+    road.top_down_image=road.warp(road.H,road.frame,road.dst_h,road.dst_w)
+    # cv2.imshow("Warped",road.top_down_image)
+    # cv2.waitKey(0)
 
-# Warp the image
 
-# Prepare the Image
+    # Prepare the Image, Edge detection, create new image to fill with contours
+    road.fill_contours()
+    # cv2.imshow("Filled",road.filled_image)
+    # cv2.waitKey(0)
 
-    # Convert the image to HSV space
+    # Find peaks
+    road.find_peaks()
 
-    # Thresh the image to HSV space
+    # Find line of best fit for points in peaks
+    road.find_lane_lines()
 
-    # Blur the image
+    # Draw the lane overlay
+    road.make_overlay()
 
-# Edge detection
+    cv2.imshow("Fancy Lanes",road.overlay)
+    if cv2.waitKey(1) == ord('q'):
+        break
 
-# Create new image to fill with contours
-
-# Find peaks
-
-# Find line of best fit for points in peaks
-
-# Draw the lane overlay
-
+    count+=1
+    road.get_frame(count)
+    # road.video=False

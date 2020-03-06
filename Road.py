@@ -6,100 +6,61 @@ class Road:
     def __init__ (self,dst_size,data_set,initial_frame_num):
         self.dst_w=dst_size[0]
         self.dst_h=dst_size[1]
-        self.frame_num=initial_frame_num
+        self.video=True
+        self.data_set=data_set
         if data_set==1:
             self.HSVLower=(0, 0, 220)
             self.HSVUpper=(255, 49, 255)
+            #region of road - determined experimentally
+            src_corners = [(585,275),(715,275),(950,512),(140,512)] 
+
         elif data_set==2:
             self.HSVLower = (0, 0, 171)
             self.HSVUpper = (91, 255, 216)
+            #region of road - determined experimentally
+            src_corners = [(615,460),(745,460),(1175,720),(250,720)] 
         else:
             print("Invalid data_set entered. Quitting...")
             exit()
-        self.get_frame()
+        self.get_frame(initial_frame_num)
 
-    def compute_homography(self):
-        road_points=self.road_points
-        h=self.h
-        w=self.w
-        #Define the eight points to compute the homography matrix
-        x,y = [],[]
-        for point in road_points:
-            x.append(point[0])
-            y.append(point[1])
+        src_pts=np.float32(src_corners).reshape(-1,1,2) #change form for homography computation
 
-        xp = [0,w,w,0]
-        yp = [0,0,h,h]
-
-        n = 9
-        m = 8
-        A = np.empty([m, n])
-
-        val = 0
-        for row in range(0,m):
-            if (row%2) == 0:
-                A[row,0] = -x[val]
-                A[row,1] = -y[val]
-                A[row,2] = -1
-                A[row,3] = 0
-                A[row,4] = 0
-                A[row,5] = 0
-                A[row,6] = x[val]*xp[val]
-                A[row,7] = y[val]*xp[val]
-                A[row,8] = xp[val]
-
-            else:
-                A[row,0] = 0
-                A[row,1] = 0
-                A[row,2] = 0
-                A[row,3] = -x[val]
-                A[row,4] = -y[val]
-                A[row,5] = -1
-                A[row,6] = x[val]*yp[val]
-                A[row,7] = y[val]*yp[val]
-                A[row,8] = yp[val]
-                val += 1
-
-        U,S,V = np.linalg.svd(A)
-        # x is equivalent to the eigenvector column of V that corresponds to the 
-        # smallest singular value. A*x ~ 0
-        x = V[-1]
-
-        # reshape x into H
-        H = np.reshape(x,[3,3])
-        return H
+        # How the source corners will match up in the destination image
+        # x1 = x3, x2 = x4 so the lanes will be parallel
+        dst_corners = [(.1*self.dst_w,0),(.9*self.dst_w,0),(.9*self.dst_w,self.dst_h),(.1*self.dst_w,self.dst_h)]
+        dst_pts=np.float32(dst_corners).reshape(-1,1,2) #change form for homography computation 
+        self.H=cv2.findHomography(dst_pts,src_pts)[0]
 
 
-    def get_frame(self):
+
+
+    def get_frame(self,frame_num):
         if self.data_set==1:
             filepath="media/Problem2/data_1/data/"
-            imagepath=filepath+('0000000000'+str(self.frame_num))[-10:]+'.png'
+            imagepath=filepath+('0000000000'+str(frame_num))[-10:]+'.png'
             frame=cv2.imread(imagepath)
             if frame is None:
-                print("Unable to import '"+str(imagepath)+"'. Quitting...")
-                exit()
+                # print("Unable to import '"+str(imagepath)+"'. Quitting...")
+                self.video=False
             self.frame=frame
 
         elif self.data_set==2:
             videopath="media/Problem2/data_2/challenge_video.mp4"
             video = cv2.VideoCapture(videopath)
             # move the video to the start frame and adjust the counter
-            video.set(1,self.frame_num)
+            video.set(1,frame_num)
             ret, frame = video.read() # ret is false if the video cannot be read
             if ret:
                 # cv2.imwrite('frame.jpg',frame)
                 self.frame=frame
             else:
-                print("Frame "+str(self.frame_num)+" exceeds video length or you've reached the end of video. Quitting...")
-                exit()
+                # print("Frame "+str(self.frame_num)+" exceeds video length or you've reached the end of video. Quitting...")
+                self.video=False
 
 
-    def warp(self):
-        H=self.H
-        src=self.src
-        h=self.h
-        w=self.w
-         # create indices of the destination image and linearize them
+    def warp(self,H,src,h,w):
+        # create indices of the destination image and linearize them
         indy, indx = np.indices((h, w), dtype=np.float32)
         lin_homg_ind = np.array([indx.ravel(), indy.ravel(), np.ones_like(indx).ravel()])
 
@@ -131,17 +92,17 @@ class Road:
         cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         # Fill in edges on blank image
-        blank=np.zeros((square_road.shape[0],square_road.shape[1]),np.uint8)
+        blank=np.zeros((self.top_down_image.shape[0],self.top_down_image.shape[1]),np.uint8)
         self.filled_image=cv2.drawContours(blank,cnts,-1,255, -1)
 
 
     def find_peaks(self):
         errorbound=50
         # Find all points that correspond to a white pixel
-        inds=np.nonzero(self.filled_image)
+        self.inds=np.nonzero(self.filled_image)
 
         # Create a histogram of the number of nonzero pixels
-        num_pixels,bins = np.histogram(inds[1],bins=self.dst_w,range=(0,self.dst_w))
+        num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
 
         peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,50))
         
@@ -187,12 +148,12 @@ class Road:
         self.left_peak=left_peak
 
 
-    def find_lane_line(self):
+    def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
         line_width = 100
         left_pts,right_pts = [], []
-        for i,x in enumerate(inds[1]):
-            y = inds[0][i]
+        for i,x in enumerate(self.inds[1]):
+            y = self.inds[0][i]
             if self.left_peak-line_width//2 <= x <= self.left_peak+line_width//2:
                 left_pts.append([x,y])
             elif self.right_peak-line_width//2 <= x <= self.right_peak+line_width//2:
@@ -207,23 +168,24 @@ class Road:
 
 
 
-    def overlay(self):
+    def make_overlay(self):
 
         # Find the corners of the polygon that bounds the lane in the squared image
         x = [self.left_lane_coeffs[1],self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1],self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1],self.right_lane_coeffs[1]]
         y = [0,self.dst_h,self.dst_h,0]
 
-        line_color = (0,0,0)
+        line_color = (0,0,255)
         arrow_color = (0,255,255)
         lane_color = (0,255,0)
+        line_thick = 10
         lane_image=np.zeros((self.dst_h,self.dst_w,3),np.uint8)
         corners = []
         for i in range(4):
             corners.append((int(x[i]),int(y[i])))
         contour = np.array(corners, dtype=np.int32)
         cv2.drawContours(lane_image,[contour],-1,lane_color,-1)
-        cv2.line(lane_image,corners[0],corners[1],line_color, 20)
-        cv2.line(lane_image,corners[2],corners[3],line_color, 20)
+        cv2.line(lane_image,corners[0],corners[1],line_color, line_thick)
+        cv2.line(lane_image,corners[2],corners[3],line_color, line_thick)
 
         mid = self.dst_h//2
         mid_x = int(((mid*self.left_lane_coeffs[0]+self.left_lane_coeffs[1])+(mid*self.right_lane_coeffs[0]+self.right_lane_coeffs[1]))/2)
@@ -242,6 +204,11 @@ class Road:
         # cv2.waitKey(0)
 
         # Find the location of those corners in the camera frame
+        x[0]-=line_thick/2
+        x[1]-=line_thick/2
+        x[2]+=line_thick/2
+        x[3]+=line_thick/2
+
         X_s = np.array([x, y, np.ones_like(x)])
         sX_c = self.H.dot(X_s)
         X_c = sX_c/sX_c[-1]
@@ -254,9 +221,13 @@ class Road:
         contour = np.array(corners, dtype=np.int32)
         lane_overlay_img = self.frame.copy()
         cv2.drawContours(lane_overlay_img,[contour],-1,(0,0,0),-1)
+        # cv2.imshow("Lane Overlay",lane_overlay_img)
+        # cv2.waitKey(0)
 
         lane_overlay_img = cv2.bitwise_or(lane_overlay_img,warped_lane)
+        # cv2.imshow("Lane Overlay",lane_overlay_img)
+        # cv2.waitKey(0)
 
         alpha = 0.5 # determine the transparency of the polygon
-        overlay = cv2.addWeighted(self.frame, 1-alpha, lane_overlay_img, alpha, 0) 
+        self.overlay = cv2.addWeighted(self.frame, 1-alpha, lane_overlay_img, alpha, 0) 
 
