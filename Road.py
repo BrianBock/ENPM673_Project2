@@ -13,12 +13,14 @@ class Road:
             self.HSVUpper=(255, 49, 255)
             #region of road - determined experimentally
             src_corners = [(585,275),(715,275),(950,512),(140,512)] 
+            self.errorbound=50
 
         elif data_set==2:
             self.HSVLower = (0, 0, 171)
             self.HSVUpper = (91, 255, 216)
             #region of road - determined experimentally
             src_corners = [(615,460),(745,460),(1175,720),(250,720)] 
+            self.errorbound=100
         else:
             print("Invalid data_set entered. Quitting...")
             exit()
@@ -97,7 +99,7 @@ class Road:
 
 
     def find_peaks(self):
-        errorbound=50
+
         # Find all points that correspond to a white pixel
         self.inds=np.nonzero(self.filled_image)
 
