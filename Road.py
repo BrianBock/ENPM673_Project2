@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from scipy import signal
+from matplotlib import pyplot as plt
 
 class Road:
     def __init__ (self,dst_size,data_set,initial_frame_num):
@@ -8,6 +9,7 @@ class Road:
         self.dst_h=dst_size[1]
         self.video=True
         self.data_set=data_set
+        self.count = 0
         if data_set==1:
             self.HSVLower=(0, 0, 220)
             self.HSVUpper=(255, 49, 255)
@@ -19,8 +21,8 @@ class Road:
             self.HSVLower = (0, 0, 171)
             self.HSVUpper = (91, 255, 216)
             #region of road - determined experimentally
-            src_corners = [(615,460),(745,460),(1175,720),(250,720)] 
-            self.errorbound=100
+            src_corners = [(625,480),(730,480),(1020,680),(240,680)] 
+            self.errorbound=25
         else:
             print("Invalid data_set entered. Quitting...")
             exit()
@@ -99,56 +101,105 @@ class Road:
 
 
     def find_peaks(self):
-
         # Find all points that correspond to a white pixel
         self.inds=np.nonzero(self.filled_image)
 
         # Create a histogram of the number of nonzero pixels
         num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
+        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
 
-        peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,50))
-        
-        peak_vals = []
-        for peak in peaks:
-            peak_vals.append(num_pixels[peak])
-            # plt.vlines(peak,0,dst_h)
-
-        max1_ind = peak_vals.index(max(peak_vals))
-        temp = peak_vals.copy()
-        temp[max1_ind] = 0
-        max2_ind = peak_vals.index(max(temp))
+        peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
 
         if len(peaks)==0: # No peaks detected
-            right_peak=self.right_peak
-            left_peak=self.left_peak
+            if self.count == 0:
+                print('Could not find both lanes on first frame')
+                exit()
+            else:
+                right_peak = self.right_peak
+                left_peak = self.left_peak
+                self.found_right_lane = False
+                self.found_left_lane = False
 
         elif len(peaks)==1: #only one peak detected
-        #Determine if the peak is closer to the right or left
-            if peak[max1_ind]>=self.dst_w/2:
-                right_peak=peak[max1_ind]
-                if abs(right_peak-self.right_peak)<errorbound: #lane is within our margin of error
-                    pass
-                else:
-                    right_peak=self.right_peak
-                left_peak=self.left_peak
+            if self.count == 0:
+                print('Could not find both lanes on first frame')
+                exit()
             else:
-                left_peak=peak[max1_ind]
-                if abs(left_peak-self.left_peak)<errorbound: #lane is within our margin of error
-                    pass
+                if peaks[0]>=self.dst_w/2 and abs(peaks[0]-self.right_peak)<self.errorbound:
+                    right_peak = peaks[0]
+                    left_peak = self.left_peak
+                    self.found_right_lane = True
+                    self.found_left_lane = False
+                elif peaks[0]<=self.dst_w/2 and abs(peaks[0]-self.left_peak)<self.errorbound:
+                    left_peak = peaks[0]
+                    right_peak = self.right_peak
+                    self.found_right_lane = False
+                    self.found_left_lane = True
                 else:
-                    left_peak=self.left_peak
-                left_peak=self.left_peak
-
+                    right_peak = self.right_peak
+                    left_peak = self.left_peak
+                    self.found_right_lane = False
+                    self.found_left_lane = False
+            
         else: # At least 2 peaks found
+            # Find the value associated with the peak 
+            peak_vals = []
+            for peak in peaks:
+                peak_vals.append(num_pixels[peak])
+
+            # Find the two highest peaks
+            max1_ind = peak_vals.index(max(peak_vals))
+            temp = peak_vals.copy()
+            temp[max1_ind] = 0
+            max2_ind = peak_vals.index(max(temp))
             big_peaks=[peaks[max1_ind],peaks[max2_ind]]
             big_peaks.sort()
 
-            left_peak=big_peaks[0]
-            right_peak=big_peaks[1]
+            if self.count == 0: #Assume first peaks found are correct
+                left_peak = big_peaks[0]
+                right_peak = big_peaks[1]
+                self.found_left_lane = True
+                self.found_right_lane = True
+            else:
+                found_left_peak = False
+                found_right_peak = False
+                for peak in peaks:
+                    if abs(peak-self.left_peak) <= self.errorbound:
+                        found_left_peak = True
+                        left_peak = peak
+                    if abs(peak-self.right_peak) <= self.errorbound: 
+                        found_right_peak = True
+                        right_peak = peak
+                
+                if found_left_peak and found_right_peak:
+                    self.found_left_lane = True
+                    self.found_right_lane = True
+                elif found_right_peak:
+                    self.found_right_lane = True
+                    self.found_left_lane = False
+                    left_peak = self.left_peak
+                    self.found_left_lane = False  
+                elif found_left_peak:
+                    self.found_left_lane = True
+                    self.found_right_lane = False
+                    right_peak = self.right_peak
+                    self.found_right_lane = False
+                else:
+                    right_peak = self.right_peak
+                    left_peak = self.left_peak
+                    self.found_right_lane = False
+                    self.found_left_lane = False                
 
         self.right_peak=right_peak
         self.left_peak=left_peak
 
+        # if self.found_left_lane:
+        #     plt.vlines(self.left_peak,0,self.dst_h,'r')
+
+        # if self.found_right_lane:
+        #     plt.vlines(self.right_peak,0,self.dst_h,'b')
+
+        # plt.show()
 
     def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
@@ -165,10 +216,17 @@ class Road:
         right_pts = np.asarray(right_pts)
 
         # Find coefficients for the best fit lines for the points
-        self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
-        self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
 
-
+        if self.found_right_lane and self.found_left_lane == False:
+            pass
+        elif self.found_left_lane == False:
+            self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
+        elif self.found_right_lane == False:
+            self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
+        else:
+            self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
+            self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
+                
 
     def make_overlay(self):
 
