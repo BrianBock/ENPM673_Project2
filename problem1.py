@@ -20,7 +20,7 @@ if write_to_video:
 	print("Writing to Video, Please Wait")
 
 # open the video specified by video_src
-video = cv2.VideoCapture('Problem1/media/Night Drive - 2689.mp4') 
+video = cv2.VideoCapture('media/Problem1/Night Drive - 2689.mp4') 
 start_frame=0
 # move the video to the start frame and adjust the counter
 video.set(1,start_frame)

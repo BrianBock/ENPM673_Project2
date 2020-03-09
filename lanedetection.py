@@ -9,7 +9,7 @@ data_set= 2
 dst_size=(500,500)
 write_to_video = True
 show_plot = True
-initial_frame_num=0
+initial_frame_num= 0
 cur_frame=initial_frame_num
 
 # Construct object road
@@ -39,7 +39,7 @@ if write_to_video:
 
 while road.video:
 
-    if road.count == 0 and data_set==2:
+    if road.count == 0 and data_set==2 and show_plot:
         plt.ion()
         fig = plt.figure(figsize=(7, 9))
         road.axs = fig.subplots(4,2)
@@ -81,6 +81,7 @@ while road.video:
             out_plt.write(image_from_plot)
     else:
         cv2.imshow("Lane Overlay",road.overlay)
+        # cv2.waitKey(0)
     
     if cv2.waitKey(1) == ord('q'):
         break

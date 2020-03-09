@@ -22,7 +22,7 @@ class Road:
         elif data_set==2:
             self.HSVthresh=[[(0, 56, 100),(255, 255, 255)],[(0, 0, 190),(255, 255, 255)]]
             #region of road - determined experimentally
-            src_corners = [(610,480),(730,480),(1020,680),(240,680)] 
+            src_corners = [(610,480),(720,480),(960,680),(300,680)] 
             self.errorbound=25
         else:
             print("Invalid data_set entered. Quitting...")
@@ -267,11 +267,20 @@ class Road:
         cv2.line(lane_image,corners[2],corners[3],line_color, line_thick)
         # cv2.imshow("Lane lines",lane_image)
 
-        # Find midpoints between generated right and left line
+        # # Find slope of left lane
+        # p1 = (0,self.left_lane_coeffs[1])
+        # p2 = (self.dst_h,self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1])
+        # ml = round((p2[1]-p1[1])/(p2[0]-p1[0]),4)
+
+        # # Find slope of left lane
+        # p1 = (0,self.right_lane_coeffs[1])
+        # p2 = (self.dst_h,self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1])
+        # mr= round((p2[1]-p1[1])/(p2[0]-p1[0]),4)
+
+        # Find slope of midline
         p1 = (0,(self.left_lane_coeffs[1]+self.right_lane_coeffs[1])//2)
         p2 = (self.dst_h,(self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1]+
             self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1])//2)
-
         m = (p2[1]-p1[1])/(p2[0]-p1[0])
 
         arrow_length = self.dst_h//10
@@ -321,6 +330,31 @@ class Road:
 
         alpha = 0.5 # determine the transparency of the polygon
         self.overlay = cv2.addWeighted(self.frame, 1-alpha, lane_overlay_img, alpha, 0)
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale = 1
+        color = (52, 152, 235)
+        thickness = 2
+        if -.05 <= m <= .05:
+            text = 'Going Straight'
+        elif m < -.05:
+            text = 'Turning Right'
+        else:
+            text = 'Turning Left'
+
+        cv2.rectangle(self.overlay,(20,10),(300,120),(255,255,255),-1)
+
+        self.overlay = cv2.putText(self.overlay, text, (50,50), font,  
+                   fontScale, color, thickness, cv2.LINE_AA) 
+
+        # self.overlay = cv2.putText(self.overlay, 'ml = '+str(ml), (50,100), font,  
+        #            fontScale, color, thickness, cv2.LINE_AA) 
+
+        # self.overlay = cv2.putText(self.overlay, 'mr = '+str(mr), (50,150), font,  
+        #            fontScale, color, thickness, cv2.LINE_AA) 
+
+        self.overlay = cv2.putText(self.overlay, 'm = '+str(m), (50,100), font,  
+                   fontScale, color, thickness, cv2.LINE_AA) 
 
 
     def make_plot(self):
