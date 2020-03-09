@@ -121,14 +121,21 @@ class Road:
 
         plt.sca(self.axs[0,0])
         plt.axis('off')
+        plt.title('Original Top Down')
         plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
+
         plt.sca(self.axs[0,1])
         plt.axis('off')
         plt.imshow(cv2.cvtColor(hsv_binary_image,cv2.COLOR_GRAY2RGB))
+        plt.title('After HSV Thresh')
+        
         plt.sca(self.axs[1,0])
         plt.axis('off')
+        plt.title('Edge detection')
         plt.imshow(cv2.cvtColor(edges,cv2.COLOR_GRAY2BGR))
+
         plt.sca(self.axs[1,1])
+        plt.title('Filled Contours')
         plt.axis('off')
         plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB))
 
@@ -140,9 +147,9 @@ class Road:
 
         plt.sca(self.axs[2,0])
         plt.axis('off')
+        plt.title('Histogram Overlay')
         # Create a histogram of the number of nonzero pixels
         plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB),extent=[0,500,0,500])
-        
         plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='yellow',histtype='step',lw=2)
         # plt.xlabel('X Column')
         # plt.ylabel('Count of White Pixels')
@@ -239,6 +246,7 @@ class Road:
 
         plt.sca(self.axs[2,1])
         plt.axis('off')
+        plt.title('Peaks')
         plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB))
         if self.found_left_lane:
             plt.vlines(self.left_peak,0,self.dst_h,'r')
@@ -278,6 +286,7 @@ class Road:
 
         plt.sca(self.axs[3,0])
         plt.axis('off')
+        plt.title('Lane Lines Overlay')
         plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
         plt.plot(x1,y1,linewidth=2,c='red')
         plt.plot(x2,y2,linewidth=2,c='red')

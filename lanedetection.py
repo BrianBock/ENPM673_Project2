@@ -28,6 +28,7 @@ while road.video:
         plt.ion()
         fig = plt.figure(figsize=(7, 9))
         road.axs = fig.subplots(4,2)
+        fig.delaxes(road.axs[3,1])
         plt.subplots_adjust(wspace=.15, hspace=.15)
         plt.tight_layout()
 
@@ -47,10 +48,7 @@ while road.video:
     # Find line of best fit for points in peaks
     road.find_lane_lines()
 
-
     plt.draw()
-
-            
 
     # Draw the lane overlay
     road.make_overlay()
