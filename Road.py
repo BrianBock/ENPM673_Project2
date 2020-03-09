@@ -109,9 +109,9 @@ class Road:
         # Fill in edges on blank image
         blank=np.zeros((self.top_down_image.shape[0],self.top_down_image.shape[1]),np.uint8)
         self.filled_image=cv2.drawContours(blank,cnts,-1,255, -1)
-        cv2.imshow("Contours",self.filled_image)
-        cv2.imwrite("filled_contours.jpg",self.filled_image)
-        cv2.waitKey(0)
+        # cv2.imshow("Contours",self.filled_image)
+        # cv2.imwrite("filled_contours.jpg",self.filled_image)
+        # cv2.waitKey(0)
 
 
     def find_peaks(self):
@@ -119,9 +119,9 @@ class Road:
         self.inds=np.nonzero(self.filled_image)
 
         # Create a histogram of the number of nonzero pixels
-        plt.imshow(self.top_down_image, extent=[0, 500, 0, 500])
+        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB), extent=[0, 500, 0, 500])
         num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
-        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='purple')
+        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='yellow',histtype='step',lw=4)
         plt.xlabel('X Column')
         plt.ylabel('Count of White Pixels')
         plt.title("Histogram Lane Detection")
