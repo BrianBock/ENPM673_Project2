@@ -14,15 +14,13 @@ class Road:
         self.data_set=data_set
         self.count = 0
         if data_set==1:
-            self.HSVLower=(0, 0, 190)
-            self.HSVUpper=(255, 255, 255)
+            self.HSVthresh=[[(0, 0, 220),(255, 49, 255)]]
             #region of road - determined experimentally
             src_corners = [(585,275),(715,275),(950,512),(140,512)] 
             self.errorbound=50
 
         elif data_set==2:
-            self.HSVLower=(0, 8, 170)
-            self.HSVUpper=(255, 255, 255)
+            self.HSVthresh=[[(0, 56, 100),(255, 255, 255)],[(0, 0, 190),(255, 255, 255)]]
             #region of road - determined experimentally
             src_corners = [(610,480),(730,480),(1020,680),(240,680)] 
             self.errorbound=25
@@ -82,7 +80,7 @@ class Road:
         return new_img
 
     
-    def fill_contours(self):
+    def HSV_thresh(self):
         # cv2.imwrite('top_down_image.jpg',self.top_down_image)
         # cv2.imshow("Top Down",self.top_down_image)
         # cv2.imwrite('top_down.jpg',self.top_down_image)
@@ -95,71 +93,47 @@ class Road:
         # cv2.waitKey(0)
 
         # Thresh the image based on the HSV max/min values
-        hsv_binary_image=cv2.inRange(hsv_image, self.HSVLower, self.HSVUpper)
-        # cv2.imshow('HSV Binary',hsv_binary_image)
-        # cv2.imwrite('hsv_binary_image.jpg',hsv_binary_image)
-        # cv2.waitKey(0)
+        self.hsv_threshs = []
+        for thresh in self.HSVthresh:
+            self.hsv_threshs.append(cv2.inRange(hsv_image, thresh[0], thresh[1]))
+
+        if len(self.hsv_threshs) == 1:
+            self.hsv_binary_image = self.hsv_threshs[0]
+        else:
+            self.hsv_binary_image = self.hsv_threshs[0]
+            for i in range(len(self.hsv_threshs)-1):
+               self.hsv_binary_image = cv2.bitwise_or(self.hsv_binary_image,self.hsv_threshs[i+1])
+
 
         # Blur the image a little bit
-        img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
-        # cv2.imshow('GaussianBlur',img_blur)
-        # cv2.imwrite('GaussianBlur.jpg',img_blur)
+        self.hsv_binary_image=cv2.GaussianBlur(self.hsv_binary_image,(15,15),0)
+        # cv2.imshow('GaussianBlur',self.hsv_binary_image)
+        # cv2.imwrite('GaussianBlur.jpg',self.hsv_binary_image)
         # cv2.waitKey(0)
 
         # Find the edges
-        edges = cv2.Canny(img_blur, 5, 10)
-        cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # edges = cv2.Canny(img_blur, 5, 10)
+        # cnts, hierarchy = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         # cv2.imshow('Edges',edges)
         # cv2.waitKey(0)
 
         # Fill in edges on blank image
-        blank=np.zeros((self.top_down_image.shape[0],self.top_down_image.shape[1]),np.uint8)
-        self.filled_image=cv2.drawContours(blank,cnts,-1,255, -1)
+        # blank=np.zeros((self.top_down_image.shape[0],self.top_down_image.shape[1]),np.uint8)
+        # self.filled_image=cv2.drawContours(blank,cnts,-1,255, -1)
         # cv2.imshow("Contours",self.filled_image)
         # cv2.imwrite("filled_contours.jpg",self.filled_image)
         # cv2.waitKey(0)
 
-        plt.sca(self.axs[0,0])
-        plt.axis('off')
-        plt.title('Original Top Down')
-        plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
-
-        plt.sca(self.axs[0,1])
-        plt.axis('off')
-        plt.imshow(cv2.cvtColor(hsv_binary_image,cv2.COLOR_GRAY2RGB))
-        plt.title('After HSV Thresh')
-        
-        plt.sca(self.axs[1,0])
-        plt.axis('off')
-        plt.title('Edge detection')
-        plt.imshow(cv2.cvtColor(edges,cv2.COLOR_GRAY2BGR))
-
-        plt.sca(self.axs[1,1])
-        plt.title('Filled Contours')
-        plt.axis('off')
-        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB))
-
 
     def find_peaks(self):
         # Find all points that correspond to a white pixel
-        self.inds=np.nonzero(self.filled_image)
+        self.inds=np.nonzero(self.hsv_binary_image)
+
+        # Create a histogram of the number of nonzero pixels
         num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
 
-        plt.sca(self.axs[2,0])
-        plt.axis('off')
-        plt.title('Histogram Overlay')
-        # Create a histogram of the number of nonzero pixels
-        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB),extent=[0,500,0,500])
-        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='yellow',histtype='step',lw=2)
-        # plt.xlabel('X Column')
-        # plt.ylabel('Count of White Pixels')
-        # plt.title("Histogram Lane Detection")
-        # fig, ax = plt.subplots()
-
-        # try:
-        peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
-        # except RuntimeWarning:
-        #     peaks = []
+        # Find peaks in histogram 
+        peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,50))
 
         if len(peaks)==0: # No peaks detected
             if self.count == 0:
@@ -244,15 +218,6 @@ class Road:
         self.right_peak=right_peak
         self.left_peak=left_peak
 
-        plt.sca(self.axs[2,1])
-        plt.axis('off')
-        plt.title('Peaks')
-        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB))
-        if self.found_left_lane:
-            plt.vlines(self.left_peak,0,self.dst_h,'r')
-
-        if self.found_right_lane:
-            plt.vlines(self.right_peak,0,self.dst_h,'b')
 
     def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
@@ -279,20 +244,6 @@ class Road:
             self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
             self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
 
-        x1 = self.left_lane_coeffs[1],self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1]
-        x2 = self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1],self.right_lane_coeffs[1]
-        y1 = 0,self.dst_h
-        y2 = self.dst_h,0
-
-        plt.sca(self.axs[3,0])
-        plt.axis('off')
-        plt.title('Lane Lines Overlay')
-        plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
-        plt.plot(x1,y1,linewidth=2,c='red')
-        plt.plot(x2,y2,linewidth=2,c='red')
-
-
-
 
     def make_overlay(self):
         # Find the corners of the polygon that bounds the lane in the squared image
@@ -305,23 +256,35 @@ class Road:
         line_thick = 10
         lane_image=np.zeros((self.dst_h,self.dst_w,3),np.uint8)
         corners = []
+        
         for i in range(4):
             corners.append((int(x[i]),int(y[i])))
+        
         contour = np.array(corners, dtype=np.int32)
         cv2.drawContours(lane_image,[contour],-1,lane_color,-1)
+        
         cv2.line(lane_image,corners[0],corners[1],line_color, line_thick)
         cv2.line(lane_image,corners[2],corners[3],line_color, line_thick)
         # cv2.imshow("Lane lines",lane_image)
 
+        # Find midpoints between generated right and left line
+        p1 = (0,(self.left_lane_coeffs[1]+self.right_lane_coeffs[1])//2)
+        p2 = (self.dst_h,(self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1]+
+            self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1])//2)
 
-        mid = self.dst_h//2
-        mid_x = int(((mid*self.left_lane_coeffs[0]+self.left_lane_coeffs[1])+(mid*self.right_lane_coeffs[0]+self.right_lane_coeffs[1]))/2)
+        m = (p2[1]-p1[1])/(p2[0]-p1[0])
 
         arrow_length = self.dst_h//10
         for i in range(5):
+        
             start_y = i*(2*arrow_length)+20
+            start_x = int(m*(start_y-p1[0])+p1[1])
             end_y = start_y+arrow_length
-            cv2.arrowedLine(lane_image, (mid_x,end_y), (mid_x,start_y), arrow_color, 10,tipLength = 0.5) 
+            end_x = int(m*(end_y-p1[0])+p1[1])
+            cv2.arrowedLine(lane_image, (end_x,end_y), (start_x,start_y), arrow_color, 10,tipLength = 0.5) 
+        
+        self.lane_image = lane_image
+
         # cv2.imshow('Arrows',lane_image)
         # cv2.imwrite('arrows.jpg',lane_image)
         # cv2.waitKey(0)
@@ -357,5 +320,64 @@ class Road:
         # cv2.waitKey(0)
 
         alpha = 0.5 # determine the transparency of the polygon
-        self.overlay = cv2.addWeighted(self.frame, 1-alpha, lane_overlay_img, alpha, 0) 
+        self.overlay = cv2.addWeighted(self.frame, 1-alpha, lane_overlay_img, alpha, 0)
+
+
+    def make_plot(self):
+        plt.sca(self.axs[0,0])
+        plt.axis('off')
+        plt.title('Original Top Down')
+        plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
+
+        plt.sca(self.axs[0,1])
+        plt.axis('off')
+        plt.title('After Yellow Thresh')
+        plt.imshow(cv2.cvtColor(self.hsv_threshs[0],cv2.COLOR_GRAY2RGB))
+        
+        plt.sca(self.axs[1,0])
+        plt.axis('off')
+        plt.title('After White HSV Thresh')
+        plt.imshow(cv2.cvtColor(self.hsv_threshs[1],cv2.COLOR_GRAY2RGB))
+        
+        plt.sca(self.axs[1,1])
+        plt.axis('off')
+        plt.title('After Bitwise_OR')
+        plt.imshow(cv2.cvtColor(self.hsv_binary_image,cv2.COLOR_GRAY2RGB))
+        
+        plt.sca(self.axs[2,0])
+        plt.axis('off')
+        plt.title('Histogram Overlay')
+        plt.imshow(cv2.cvtColor(self.hsv_binary_image,cv2.COLOR_GRAY2RGB),extent=[0,500,0,500])
+        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='yellow',histtype='step',lw=2)
+
+        plt.sca(self.axs[2,1])
+        plt.axis('off')
+        plt.title('Left and Right Peaks')
+        plt.imshow(cv2.cvtColor(self.hsv_binary_image,cv2.COLOR_GRAY2RGB))
+        if self.found_left_lane:
+            plt.vlines(self.left_peak,0,self.dst_h,'r')
+
+        if self.found_right_lane:
+            plt.vlines(self.right_peak,0,self.dst_h,'b')
+
+        x1 = self.left_lane_coeffs[1],self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1]
+        x2 = self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1],self.right_lane_coeffs[1]
+        y1 = 0,self.dst_h
+        y2 = self.dst_h,0
+
+        plt.sca(self.axs[3,0])
+        plt.axis('off')
+        plt.title('Lane Lines Overlay')
+        plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
+        plt.plot(x1,y1,linewidth=2,c='red')
+        plt.plot(x2,y2,linewidth=2,c='red')
+
+        plt.sca(self.axs[3,1])
+        plt.axis('off')
+        plt.title('Lane Overlay')
+        plt.imshow(cv2.cvtColor(self.lane_image,cv2.COLOR_BGR2RGB))
+
+        plt.draw()
+
+
 
