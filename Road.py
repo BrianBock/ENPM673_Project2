@@ -101,12 +101,19 @@ class Road:
 
 
     def find_peaks(self):
+        show_histogram=False
         # Find all points that correspond to a white pixel
         self.inds=np.nonzero(self.filled_image)
 
         # Create a histogram of the number of nonzero pixels
         num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
         plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
+        if show_histogram:
+            plt.xlabel('X Column')
+            plt.ylabel('Count of White Pixels')
+            plt.title("Histogram Lane Detection")
+            plt.show()
+
 
         peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
 
@@ -193,13 +200,14 @@ class Road:
         self.right_peak=right_peak
         self.left_peak=left_peak
 
-        # if self.found_left_lane:
-        #     plt.vlines(self.left_peak,0,self.dst_h,'r')
+        if show_histogram:
+            if self.found_left_lane:
+                plt.vlines(self.left_peak,0,self.dst_h,'r')
 
-        # if self.found_right_lane:
-        #     plt.vlines(self.right_peak,0,self.dst_h,'b')
+            if self.found_right_lane:
+                plt.vlines(self.right_peak,0,self.dst_h,'b')
 
-        # plt.show()
+            plt.show()
 
     def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
@@ -226,6 +234,7 @@ class Road:
         else:
             self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
             self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
+
                 
 
     def make_overlay(self):
@@ -246,6 +255,8 @@ class Road:
         cv2.drawContours(lane_image,[contour],-1,lane_color,-1)
         cv2.line(lane_image,corners[0],corners[1],line_color, line_thick)
         cv2.line(lane_image,corners[2],corners[3],line_color, line_thick)
+        cv2.imshow("Lane lines",lane_image)
+
 
         mid = self.dst_h//2
         mid_x = int(((mid*self.left_lane_coeffs[0]+self.left_lane_coeffs[1])+(mid*self.right_lane_coeffs[0]+self.right_lane_coeffs[1]))/2)
@@ -255,7 +266,8 @@ class Road:
             start_y = i*(2*arrow_length)+20
             end_y = start_y+arrow_length
             cv2.arrowedLine(lane_image, (mid_x,end_y), (mid_x,start_y), arrow_color, 10,tipLength = 0.5) 
-        # cv2.imshow('Lane',lane)
+        # cv2.imshow('Arrows',lane_image)
+        # cv2.imwrite('arrows.jpg',lane_image)
         # cv2.waitKey(0)
         
         H_inv = np.linalg.inv(self.H)
