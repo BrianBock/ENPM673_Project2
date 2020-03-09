@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 from scipy import signal
 from matplotlib import pyplot as plt
+import warnings
+warnings.filterwarnings("error")
 
 class Road:
     def __init__ (self,dst_size,data_set,initial_frame_num):
@@ -11,15 +13,15 @@ class Road:
         self.data_set=data_set
         self.count = 0
         if data_set==1:
-            self.HSVLower=(0, 0, 220)
-            self.HSVUpper=(255, 49, 255)
+            self.HSVLower=(0, 0, 190)
+            self.HSVUpper=(255, 255, 255)
             #region of road - determined experimentally
             src_corners = [(585,275),(715,275),(950,512),(140,512)] 
             self.errorbound=50
 
         elif data_set==2:
-            self.HSVLower = (0, 0, 171)
-            self.HSVUpper = (91, 255, 216)
+            self.HSVLower=(0, 0, 190)
+            self.HSVUpper=(255, 255, 255)
             #region of road - determined experimentally
             src_corners = [(625,480),(730,480),(1020,680),(240,680)] 
             self.errorbound=25
@@ -32,7 +34,7 @@ class Road:
 
         # How the source corners will match up in the destination image
         # x1 = x3, x2 = x4 so the lanes will be parallel
-        dst_corners = [(.1*self.dst_w,0),(.9*self.dst_w,0),(.9*self.dst_w,self.dst_h),(.1*self.dst_w,self.dst_h)]
+        dst_corners = [(.2*self.dst_w,0),(.8*self.dst_w,0),(.8*self.dst_w,self.dst_h),(.2*self.dst_w,self.dst_h)]
         dst_pts=np.float32(dst_corners).reshape(-1,1,2) #change form for homography computation 
         self.H=cv2.findHomography(dst_pts,src_pts)[0]
 
@@ -82,17 +84,18 @@ class Road:
     def fill_contours(self):
         # cv2.imwrite('top_down_image.jpg',self.top_down_image)
         # cv2.imshow("Top Down",self.top_down_image)
+        # cv2.imwrite('top_down.jpg',self.top_down_image)
         # cv2.waitKey(0)
+
         # Convert the image to HSV space
         hsv_image = cv2.cvtColor(self.top_down_image, cv2.COLOR_BGR2HSV)
-
         # cv2.imwrite("hsv.jpg",hsv_image)
         # cv2.imshow("hsv",hsv_image)
         # cv2.waitKey(0)
 
         # Thresh the image based on the HSV max/min values
         hsv_binary_image=cv2.inRange(hsv_image, self.HSVLower, self.HSVUpper)
-        # cv2.imshow('Filled Contours',hsv_binary_image)
+        # cv2.imshow('HSV Binary',hsv_binary_image)
         # cv2.imwrite('hsv_binary_image.jpg',hsv_binary_image)
         # cv2.waitKey(0)
 
@@ -105,6 +108,8 @@ class Road:
         # Find the edges
         edges = cv2.Canny(img_blur, 5, 10)
         cnts, hierarchy = cv2.findContours(img_blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # cv2.imshow('Edges',edges)
+        # cv2.waitKey(0)
 
         # Fill in edges on blank image
         blank=np.zeros((self.top_down_image.shape[0],self.top_down_image.shape[1]),np.uint8)
@@ -125,13 +130,12 @@ class Road:
         plt.xlabel('X Column')
         plt.ylabel('Count of White Pixels')
         plt.title("Histogram Lane Detection")
-        # img = plt.imread("airlines.jpg")
         # fig, ax = plt.subplots()
-        
-        # plt.show()
 
-
-        peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
+        try:
+            peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
+        except RuntimeWarning:
+            peaks = []
 
         if len(peaks)==0: # No peaks detected
             if self.count == 0:
@@ -222,7 +226,7 @@ class Road:
         if self.found_right_lane:
             plt.vlines(self.right_peak,0,self.dst_h,'b')
 
-        plt.show()
+        # plt.show()
 
     def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
@@ -239,21 +243,17 @@ class Road:
         right_pts = np.asarray(right_pts)
 
         # Find coefficients for the best fit lines for the points
-
-        if self.found_right_lane and self.found_left_lane == False:
+        if not self.found_right_lane and not self.found_left_lane:
             pass
-        elif self.found_left_lane == False:
+        elif not self.found_left_lane:
             self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
-        elif self.found_right_lane == False:
+        elif not self.found_right_lane:
             self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
         else:
             self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
             self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
 
-                
-
     def make_overlay(self):
-
         # Find the corners of the polygon that bounds the lane in the squared image
         x = [self.left_lane_coeffs[1],self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1],self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1],self.right_lane_coeffs[1]]
         y = [0,self.dst_h,self.dst_h,0]

@@ -1,11 +1,10 @@
-
 import cv2
 from Road import Road
 
 data_set=2
 dst_size=(500,500)
-write_to_video=False
-initial_frame_num=0
+write_to_video= False
+initial_frame_num=20
 cur_frame=initial_frame_num
 
 # Construct object road
@@ -32,14 +31,20 @@ while road.video:
     # Find peaks
     road.find_peaks()
 
+    
+
     # Find line of best fit for points in peaks
     road.find_lane_lines()
 
     # Draw the lane overlay
     road.make_overlay()
 
-    cv2.imshow("Fancy Lanes",road.overlay)
-
+    print("Frame: "+str(cur_frame))
+    if write_to_video:
+        out.write(road.overlay)
+    else:
+        cv2.imshow("Fancy Lanes",road.overlay)
+    
     if cv2.waitKey(1) == ord('q'):
         break
 
@@ -48,5 +53,8 @@ while road.video:
 
     road.get_frame(cur_frame)
 
-
+    # Use this for viewing only one frame at a time
     # road.video=False
+
+if write_to_video:
+    out.release()
