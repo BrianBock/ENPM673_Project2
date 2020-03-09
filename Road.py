@@ -2,8 +2,9 @@ import numpy as np
 import cv2
 from scipy import signal
 from matplotlib import pyplot as plt
+
 import warnings
-warnings.filterwarnings("error")
+warnings.filterwarnings("ignore")
 
 class Road:
     def __init__ (self,dst_size,data_set,initial_frame_num):
@@ -20,10 +21,10 @@ class Road:
             self.errorbound=50
 
         elif data_set==2:
-            self.HSVLower=(0, 0, 190)
+            self.HSVLower=(0, 8, 170)
             self.HSVUpper=(255, 255, 255)
             #region of road - determined experimentally
-            src_corners = [(625,480),(730,480),(1020,680),(240,680)] 
+            src_corners = [(610,480),(730,480),(1020,680),(240,680)] 
             self.errorbound=25
         else:
             print("Invalid data_set entered. Quitting...")
@@ -118,24 +119,40 @@ class Road:
         # cv2.imwrite("filled_contours.jpg",self.filled_image)
         # cv2.waitKey(0)
 
+        plt.sca(self.axs[0,0])
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
+        plt.sca(self.axs[0,1])
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(hsv_binary_image,cv2.COLOR_GRAY2RGB))
+        plt.sca(self.axs[1,0])
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(edges,cv2.COLOR_GRAY2BGR))
+        plt.sca(self.axs[1,1])
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB))
+
 
     def find_peaks(self):
         # Find all points that correspond to a white pixel
         self.inds=np.nonzero(self.filled_image)
-
-        # Create a histogram of the number of nonzero pixels
-        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB), extent=[0, 500, 0, 500])
         num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
-        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='yellow',histtype='step',lw=4)
-        plt.xlabel('X Column')
-        plt.ylabel('Count of White Pixels')
-        plt.title("Histogram Lane Detection")
+
+        plt.sca(self.axs[2,0])
+        plt.axis('off')
+        # Create a histogram of the number of nonzero pixels
+        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB),extent=[0,500,0,500])
+        
+        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='yellow',histtype='step',lw=2)
+        # plt.xlabel('X Column')
+        # plt.ylabel('Count of White Pixels')
+        # plt.title("Histogram Lane Detection")
         # fig, ax = plt.subplots()
 
-        try:
-            peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
-        except RuntimeWarning:
-            peaks = []
+        # try:
+        peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
+        # except RuntimeWarning:
+        #     peaks = []
 
         if len(peaks)==0: # No peaks detected
             if self.count == 0:
@@ -220,13 +237,14 @@ class Road:
         self.right_peak=right_peak
         self.left_peak=left_peak
 
+        plt.sca(self.axs[2,1])
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(self.filled_image,cv2.COLOR_GRAY2RGB))
         if self.found_left_lane:
             plt.vlines(self.left_peak,0,self.dst_h,'r')
 
         if self.found_right_lane:
             plt.vlines(self.right_peak,0,self.dst_h,'b')
-
-        # plt.show()
 
     def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
@@ -252,6 +270,20 @@ class Road:
         else:
             self.left_lane_coeffs=np.polyfit(left_pts[:,1],left_pts[:,0],1)
             self.right_lane_coeffs=np.polyfit(right_pts[:,1],right_pts[:,0],1)
+
+        x1 = self.left_lane_coeffs[1],self.dst_h*self.left_lane_coeffs[0]+self.left_lane_coeffs[1]
+        x2 = self.dst_h*self.right_lane_coeffs[0]+self.right_lane_coeffs[1],self.right_lane_coeffs[1]
+        y1 = 0,self.dst_h
+        y2 = self.dst_h,0
+
+        plt.sca(self.axs[3,0])
+        plt.axis('off')
+        plt.imshow(cv2.cvtColor(self.top_down_image,cv2.COLOR_BGR2RGB))
+        plt.plot(x1,y1,linewidth=2,c='red')
+        plt.plot(x2,y2,linewidth=2,c='red')
+
+
+
 
     def make_overlay(self):
         # Find the corners of the polygon that bounds the lane in the squared image

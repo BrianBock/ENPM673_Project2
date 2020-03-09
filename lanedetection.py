@@ -1,3 +1,5 @@
+from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
 import cv2
 from Road import Road
 
@@ -22,6 +24,17 @@ if write_to_video:
 
 while road.video:
 
+    if road.count == 0:
+        plt.ion()
+        fig = plt.figure(figsize=(7, 9))
+        road.axs = fig.subplots(4,2)
+        plt.subplots_adjust(wspace=.15, hspace=.15)
+        plt.tight_layout()
+
+    for i in range(4):
+        for j in range(2):
+            road.axs[i,j].cla()
+
     # Warp the image
     road.top_down_image=road.warp(road.H,road.frame,road.dst_h,road.dst_w)
 
@@ -31,10 +44,13 @@ while road.video:
     # Find peaks
     road.find_peaks()
 
-    
-
     # Find line of best fit for points in peaks
     road.find_lane_lines()
+
+
+    plt.draw()
+
+            
 
     # Draw the lane overlay
     road.make_overlay()
