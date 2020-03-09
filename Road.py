@@ -80,16 +80,27 @@ class Road:
 
     
     def fill_contours(self):
+        # cv2.imwrite('top_down_image.jpg',self.top_down_image)
+        # cv2.imshow("Top Down",self.top_down_image)
+        # cv2.waitKey(0)
         # Convert the image to HSV space
         hsv_image = cv2.cvtColor(self.top_down_image, cv2.COLOR_BGR2HSV)
+
+        # cv2.imwrite("hsv.jpg",hsv_image)
+        # cv2.imshow("hsv",hsv_image)
+        # cv2.waitKey(0)
 
         # Thresh the image based on the HSV max/min values
         hsv_binary_image=cv2.inRange(hsv_image, self.HSVLower, self.HSVUpper)
         # cv2.imshow('Filled Contours',hsv_binary_image)
+        # cv2.imwrite('hsv_binary_image.jpg',hsv_binary_image)
         # cv2.waitKey(0)
 
         # Blur the image a little bit
         img_blur=cv2.GaussianBlur(hsv_binary_image,(15,15),0)
+        # cv2.imshow('GaussianBlur',img_blur)
+        # cv2.imwrite('GaussianBlur.jpg',img_blur)
+        # cv2.waitKey(0)
 
         # Find the edges
         edges = cv2.Canny(img_blur, 5, 10)
@@ -98,21 +109,26 @@ class Road:
         # Fill in edges on blank image
         blank=np.zeros((self.top_down_image.shape[0],self.top_down_image.shape[1]),np.uint8)
         self.filled_image=cv2.drawContours(blank,cnts,-1,255, -1)
+        cv2.imshow("Contours",self.filled_image)
+        cv2.imwrite("filled_contours.jpg",self.filled_image)
+        cv2.waitKey(0)
 
 
     def find_peaks(self):
-        show_histogram=False
         # Find all points that correspond to a white pixel
         self.inds=np.nonzero(self.filled_image)
 
         # Create a histogram of the number of nonzero pixels
+        plt.imshow(self.top_down_image, extent=[0, 500, 0, 500])
         num_pixels,bins = np.histogram(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
-        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w))
-        if show_histogram:
-            plt.xlabel('X Column')
-            plt.ylabel('Count of White Pixels')
-            plt.title("Histogram Lane Detection")
-            plt.show()
+        plt.hist(self.inds[1],bins=self.dst_w,range=(0,self.dst_w),color='purple')
+        plt.xlabel('X Column')
+        plt.ylabel('Count of White Pixels')
+        plt.title("Histogram Lane Detection")
+        # img = plt.imread("airlines.jpg")
+        # fig, ax = plt.subplots()
+        
+        # plt.show()
 
 
         peaks = signal.find_peaks_cwt(num_pixels, np.arange(1,25))
@@ -200,14 +216,13 @@ class Road:
         self.right_peak=right_peak
         self.left_peak=left_peak
 
-        if show_histogram:
-            if self.found_left_lane:
-                plt.vlines(self.left_peak,0,self.dst_h,'r')
+        if self.found_left_lane:
+            plt.vlines(self.left_peak,0,self.dst_h,'r')
 
-            if self.found_right_lane:
-                plt.vlines(self.right_peak,0,self.dst_h,'b')
+        if self.found_right_lane:
+            plt.vlines(self.right_peak,0,self.dst_h,'b')
 
-            plt.show()
+        plt.show()
 
     def find_lane_lines(self):
          # Collect all the points that are within a lane-width of the two peaks
@@ -255,7 +270,7 @@ class Road:
         cv2.drawContours(lane_image,[contour],-1,lane_color,-1)
         cv2.line(lane_image,corners[0],corners[1],line_color, line_thick)
         cv2.line(lane_image,corners[2],corners[3],line_color, line_thick)
-        cv2.imshow("Lane lines",lane_image)
+        # cv2.imshow("Lane lines",lane_image)
 
 
         mid = self.dst_h//2
