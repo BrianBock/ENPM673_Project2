@@ -33,14 +33,21 @@ if write_to_video:
 
 
 #https://www.pyimagesearch.com/2015/10/05/opencv-gamma-correction/
-def adjust_gamma(image, gamma=1.0):
+def adjust_gamma(image, gamma, show_output, write_to_video):
 	# build a lookup table mapping the pixel values [0, 255] to
 	# their adjusted gamma values
 	invGamma = 1.0 / gamma
 	table = np.array([((i / 255.0) ** invGamma) * 255
 		for i in np.arange(0, 256)]).astype("uint8")
 	# apply gamma correction using the lookup table
-	return cv2.LUT(image, table)
+	new_img=cv2.LUT(image, table)
+	if show_output:
+		cv2.imshow("Original",imutils.resize(frame,900))
+		cv2.imshow("Gamma (+"+str(gamma)+")",imutils.resize(new_img,900))
+	if write_to_video:
+		out.write(new_img)
+
+	return new_img
 		# equ = cv2.equalizeHist(highcontrast)
 
 
@@ -74,7 +81,7 @@ def adjust_contrast(frame,contrast,show_output,write_to_video):
 	return high_contrast
 
 
-def equalize_Hist(frame,show_output,write_to_video):
+def equalize_Hist_YUV(frame,show_output,write_to_video):
 	# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
 	img_yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
 
@@ -93,6 +100,25 @@ def equalize_Hist(frame,show_output,write_to_video):
 
 	return img_output
 
+
+def equalize_Hist_HSV(frame,show_output,write_to_video):
+	# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
+	img_HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+	# equalize the histogram of the V channel
+	img_HSV[:,:,0] = cv2.equalizeHist(img_HSV[:,:,0])
+
+	# convert the HSV image back to RGB format
+	img_output = cv2.cvtColor(img_HSV, cv2.COLOR_HSV2BGR)
+
+	if show_output:
+		cv2.imshow('Color input image', frame)
+		cv2.imshow('Histogram equalized', img_output)
+
+	if write_to_video:
+		out.write(img_output)
+
+	return img_output
 
 
 
@@ -120,32 +146,20 @@ while(video.isOpened()):
 		# cv2.waitKey(0)
 
 		# Equalize Histogram in YUV Space
-		hist_eq=equalize_Hist(frame,show_output,write_to_video)
-		cv2.imwrite("Histeq.jpg",hist_eq)
-		cv2.waitKey(0)
+		# hist_eq=equalize_Hist_YUV(frame,show_output,write_to_video)
+		# hist_eq=equalize_Hist_HSV(frame,show_output,write_to_video)
+
+		# cv2.imwrite("HisteqHSV.jpg",hist_eq)
+		# cv2.waitKey(0)
 
 
-		#https://www.pyimagesearch.com/2015/10/05/opencv-gamma-correction/
-		# construct the argument parse and parse the arguments
-		# ap = argparse.ArgumentParser()
-		# ap.add_argument("-i", "--image", required=True,
-		# 	help="path to input image")
-		# args = vars(ap.parse_args())
-		# # # load the original image
-		# original = frame#cv2.imread(args["image"])
+		
 
-		# # loop over various values of gamma
-		# for gamma in np.arange(0.0, 3.5, 0.5):
-		# 	# ignore when gamma is 1 (there will be no change to the image)
-		# 	if gamma == 1:
-		# 		continue
-		# 	# apply gamma correction and show the images
-		# 	gamma = 2.5
-		# 	adjusted = adjust_gamma(original, gamma=gamma)
-		# 	# cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
-		# 	# 	cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 3)
-		# 	cv2.imshow("Images", adjusted)
-			# cv2.waitKey(0)
+		gamma = 2
+		new_gamma = adjust_gamma(frame, gamma,show_output,write_to_video)
+		cv2.imshow("Gamma "+str(gamma), new_gamma)
+		# cv2.imwrite("Gamma"+str(gamma)+".jpg", new_gamma)
+		# cv2.waitKey(0)
 
 
 
