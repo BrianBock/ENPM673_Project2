@@ -7,8 +7,8 @@ import time
 # import argparse	
 		
 
-write_to_video=True
-show_output=False
+write_to_video=False
+show_output=True
 
 
 # open the video specified by video_src
@@ -91,6 +91,8 @@ def equalize_Hist(frame,show_output,write_to_video):
 	if write_to_video:
 		out.write(img_output)
 
+	return img_output
+
 
 
 
@@ -119,6 +121,8 @@ while(video.isOpened()):
 
 		# Equalize Histogram in YUV Space
 		hist_eq=equalize_Hist(frame,show_output,write_to_video)
+		cv2.imwrite("Histeq.jpg",hist_eq)
+		cv2.waitKey(0)
 
 
 		#https://www.pyimagesearch.com/2015/10/05/opencv-gamma-correction/
