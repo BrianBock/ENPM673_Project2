@@ -18,7 +18,7 @@ if write_to_video:
 	videoname=str(today)
 	fps_out = 29
 	out = cv2.VideoWriter(str(videoname)+".avi", fourcc, fps_out, (1920, 1080))
-	print("Writing to Video, Please Wait")
+	print("Writing to Video, please Wait")
 
 
 # open the video specified by video_src
@@ -60,7 +60,6 @@ def adjust_brightness(image,brightness, show_output,write_to_video):
 
 def adjust_contrast(image,contrast,show_output,write_to_video):
 	frame32=np.asarray(frame,dtype="int32")
-	contrast=3
 	high_contrast=frame32*contrast
 	high_contrast=np.clip(high_contrast,0,255)
 	high_contrast=np.asarray(high_contrast,dtype="uint8")
@@ -68,7 +67,7 @@ def adjust_contrast(image,contrast,show_output,write_to_video):
 		cv2.imshow("Original",imutils.resize(frame,600))
 		cv2.imshow("Contrast (*"+str(contrast)+")",imutils.resize(high_contrast,600))
 	if write_to_video:
-		out.write(bright_image)
+		out.write(high_contrast)
 	
 	return high_contrast
 
@@ -82,12 +81,12 @@ while(video.isOpened()):
 
 		# Increase Brightness
 		brightness=50
-		bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
+		# bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
 		# out.write(bright_image)
 		
 
 		# Increase Contrast
-		high_contrast=adjust_contrast(frame,2,show_output,write_to_video)
+		high_contrast=adjust_contrast(frame,4,show_output,write_to_video)
 		# out.write(high_contrast)
 
 
