@@ -7,13 +7,13 @@ import time
 # import argparse	
 		
 
-write_to_video=False
-show_output=True
+write_to_video=True
+show_output=False
 
 
 # open the video specified by video_src
 video = cv2.VideoCapture('../media/Problem1/Night Drive - 2689.mp4')
-start_frame=365+24
+start_frame=0#365+24
 # move the video to the start frame and adjust the counter
 video.set(1,start_frame)
 count = start_frame
@@ -76,7 +76,7 @@ def adjust_contrast(frame,contrast,show_output,write_to_video):
 
 def equalize_Hist(frame,show_output,write_to_video):
 	# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
-	img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+	img_yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
 
 	# equalize the histogram of the Y channel
 	img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
@@ -101,7 +101,7 @@ while(video.isOpened()):
 
 		# Increase Brightness
 		brightness=100
-		bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
+		# bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
 		# cv2.imwrite("brightness"+str(brightness)+".jpg",bright_image)
 		# cv2.waitKey(0)
 
@@ -111,12 +111,14 @@ while(video.isOpened()):
 
 		# Increase Contrast
 		contrast=9
-		high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
-		cv2.imwrite("contrast"+str(contrast)+".jpg",high_contrast)
+		# high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
+		# cv2.imwrite("contrast"+str(contrast)+".jpg",high_contrast)
 		# cv2.imwrite("original.jpg",frame)
 		# out.write(high_contrast)
 		# cv2.waitKey(0)
 
+		# Equalize Histogram in YUV Space
+		hist_eq=equalize_Hist(frame,show_output,write_to_video)
 
 
 		#https://www.pyimagesearch.com/2015/10/05/opencv-gamma-correction/
