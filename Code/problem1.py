@@ -2,12 +2,12 @@
 # Import required packages
 import numpy as np
 import cv2
-#import imutils
+import imutils
 import time
 # import argparse	
 		
 
-write_to_video=False
+write_to_video=True
 
 
 # Define the codec and initialize the output file
@@ -50,8 +50,26 @@ while(video.isOpened()):
 	ret, frame = video.read() # ret is false if the video cannot be read
 	if ret:
 
-		#cv2.imshow("Original",frame)
-		#highcontrast=frame*2
+		# Increase Brightness
+		# frame32=np.asarray(frame,dtype="int32")
+		# brightness=50
+		# bright_image=frame32+brightness
+		# bright_image=np.clip(bright_image,0,255)
+		# bright_image=np.asarray(bright_image,dtype="uint8")
+		# # cv2.imshow("Original",imutils.resize(frame,600))
+		# # cv2.imshow("Brighter (+"+str(brightness)+")",imutils.resize(bright_image,600))
+		# out.write(bright_image)
+		
+
+		# Increase Contrast
+		frame32=np.asarray(frame,dtype="int32")
+		contrast=3
+		high_contrast=frame32*contrast
+		high_contrast=np.clip(high_contrast,0,255)
+		high_contrast=np.asarray(high_contrast,dtype="uint8")
+		# cv2.imshow("Original",imutils.resize(frame,600))
+		# cv2.imshow("Contrast (*"+str(contrast)+")",imutils.resize(high_contrast,600))
+		out.write(high_contrast)
 
 
 
@@ -61,20 +79,20 @@ while(video.isOpened()):
 		# ap.add_argument("-i", "--image", required=True,
 		# 	help="path to input image")
 		# args = vars(ap.parse_args())
-		# # load the original image
-		original = frame#cv2.imread(args["image"])
+		# # # load the original image
+		# original = frame#cv2.imread(args["image"])
 
-		# loop over various values of gamma
-		for gamma in np.arange(0.0, 3.5, 0.5):
-			# ignore when gamma is 1 (there will be no change to the image)
-			if gamma == 1:
-				continue
-			# apply gamma correction and show the images
-			gamma = 2.5
-			adjusted = adjust_gamma(original, gamma=gamma)
-			# cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
-			# 	cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 3)
-			cv2.imshow("Images", adjusted)
+		# # loop over various values of gamma
+		# for gamma in np.arange(0.0, 3.5, 0.5):
+		# 	# ignore when gamma is 1 (there will be no change to the image)
+		# 	if gamma == 1:
+		# 		continue
+		# 	# apply gamma correction and show the images
+		# 	gamma = 2.5
+		# 	adjusted = adjust_gamma(original, gamma=gamma)
+		# 	# cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
+		# 	# 	cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 3)
+		# 	cv2.imshow("Images", adjusted)
 			# cv2.waitKey(0)
 
 
@@ -112,8 +130,8 @@ while(video.isOpened()):
 	if cv2.waitKey(1) == ord('q'):
 		video.release()
 
-	if write_to_video:
-		out.release()
+if write_to_video:
+	out.release()
 
 
 
