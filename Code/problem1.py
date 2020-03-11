@@ -8,6 +8,7 @@ import time
 		
 
 write_to_video=True
+show_output=False
 
 
 # Define the codec and initialize the output file
@@ -19,8 +20,9 @@ if write_to_video:
 	out = cv2.VideoWriter(str(videoname)+".avi", fourcc, fps_out, (1920, 1080))
 	print("Writing to Video, Please Wait")
 
+
 # open the video specified by video_src
-video = cv2.VideoCapture('media/Problem1/Night Drive - 2689.mp4') 
+video = cv2.VideoCapture('../media/Problem1/Night Drive - 2689.mp4') 
 start_frame=0
 # move the video to the start frame and adjust the counter
 video.set(1,start_frame)
@@ -41,6 +43,34 @@ def adjust_gamma(image, gamma=1.0):
 
 
 
+def adjust_brightness(image,brightness, show_output,write_to_video):
+	frame32=np.asarray(frame,dtype="int32")
+	bright_image=frame32+brightness
+	bright_image=np.clip(bright_image,0,255)
+	bright_image=np.asarray(bright_image,dtype="uint8")
+	if show_output:
+		cv2.imshow("Original",imutils.resize(frame,600))
+		cv2.imshow("Brighter (+"+str(brightness)+")",imutils.resize(bright_image,600))
+	if write_to_video:
+		out.write(bright_image)
+	
+	return bright_image
+
+
+
+def adjust_contrast(image,contrast,show_output,write_to_video):
+	frame32=np.asarray(frame,dtype="int32")
+	contrast=3
+	high_contrast=frame32*contrast
+	high_contrast=np.clip(high_contrast,0,255)
+	high_contrast=np.asarray(high_contrast,dtype="uint8")
+	if show_output:
+		cv2.imshow("Original",imutils.resize(frame,600))
+		cv2.imshow("Contrast (*"+str(contrast)+")",imutils.resize(high_contrast,600))
+	if write_to_video:
+		out.write(bright_image)
+	
+	return high_contrast
 
 
 
@@ -51,25 +81,14 @@ while(video.isOpened()):
 	if ret:
 
 		# Increase Brightness
-		# frame32=np.asarray(frame,dtype="int32")
-		# brightness=50
-		# bright_image=frame32+brightness
-		# bright_image=np.clip(bright_image,0,255)
-		# bright_image=np.asarray(bright_image,dtype="uint8")
-		# # cv2.imshow("Original",imutils.resize(frame,600))
-		# # cv2.imshow("Brighter (+"+str(brightness)+")",imutils.resize(bright_image,600))
+		brightness=50
+		bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
 		# out.write(bright_image)
 		
 
 		# Increase Contrast
-		frame32=np.asarray(frame,dtype="int32")
-		contrast=3
-		high_contrast=frame32*contrast
-		high_contrast=np.clip(high_contrast,0,255)
-		high_contrast=np.asarray(high_contrast,dtype="uint8")
-		# cv2.imshow("Original",imutils.resize(frame,600))
-		# cv2.imshow("Contrast (*"+str(contrast)+")",imutils.resize(high_contrast,600))
-		out.write(high_contrast)
+		high_contrast=adjust_contrast(frame,2,show_output,write_to_video)
+		# out.write(high_contrast)
 
 
 
@@ -95,8 +114,6 @@ while(video.isOpened()):
 		# 	cv2.imshow("Images", adjusted)
 			# cv2.waitKey(0)
 
-
-		# cv2.imshow("Contrast",equ)
 
 
 		# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
