@@ -45,7 +45,7 @@ def adjust_gamma(image, gamma=1.0):
 
 
 
-def adjust_brightness(image,brightness, show_output,write_to_video):
+def adjust_brightness(frame,brightness, show_output,write_to_video):
 	frame32=np.asarray(frame,dtype="int32")
 	bright_image=frame32+brightness
 	bright_image=np.clip(bright_image,0,255)
@@ -60,7 +60,7 @@ def adjust_brightness(image,brightness, show_output,write_to_video):
 
 
 
-def adjust_contrast(image,contrast,show_output,write_to_video):
+def adjust_contrast(frame,contrast,show_output,write_to_video):
 	frame32=np.asarray(frame,dtype="int32")
 	high_contrast=frame32*contrast
 	high_contrast=np.clip(high_contrast,0,255)
@@ -72,6 +72,21 @@ def adjust_contrast(image,contrast,show_output,write_to_video):
 		out.write(high_contrast)
 	
 	return high_contrast
+
+
+def equalize_Hist(frame,show_output,write_to_video):
+		# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
+		img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+		# equalize the histogram of the Y channel
+		img_hsv[:,:,0] = cv2.equalizeHist(img_hsv[:,:,0])
+
+		# convert the YUV image back to RGB format
+		img_output = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR)
+
+		cv2.imshow('Color input image', frame)
+		cv2.imshow('Histogram equalized', img_output)
+
 
 
 
@@ -92,11 +107,12 @@ while(video.isOpened()):
 		
 
 		# Increase Contrast
-		contrast=6
+		contrast=9
 		high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
-		# cv2.imwrite("contrast6.jpg",high_contrast)
+		cv2.imwrite("contrast"+str(contrast)+".jpg",high_contrast)
 		# cv2.imwrite("original.jpg",frame)
 		# out.write(high_contrast)
+		# cv2.waitKey(0)
 
 
 
@@ -124,17 +140,6 @@ while(video.isOpened()):
 
 
 
-		# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
-		# img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-		# # equalize the histogram of the Y channel
-		# img_hsv[:,:,0] = cv2.equalizeHist(img_hsv[:,:,0])
-
-		# # convert the YUV image back to RGB format
-		# img_output = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR)
-
-		# cv2.imshow('Color input image', frame)
-		# cv2.imshow('Histogram equalized', img_output)
 
 
 
