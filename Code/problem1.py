@@ -7,8 +7,16 @@ import time
 # import argparse	
 		
 
-write_to_video=True
-show_output=False
+write_to_video=False
+show_output=True
+
+
+# open the video specified by video_src
+video = cv2.VideoCapture('../media/Problem1/Night Drive - 2689.mp4')
+start_frame=365+24
+# move the video to the start frame and adjust the counter
+video.set(1,start_frame)
+count = start_frame
 
 
 # Define the codec and initialize the output file
@@ -18,15 +26,9 @@ if write_to_video:
 	videoname=str(today)
 	fps_out = 29
 	out = cv2.VideoWriter(str(videoname)+".avi", fourcc, fps_out, (1920, 1080))
-	print("Writing to Video, please Wait")
+	print("Writing to video, please wait...")
 
 
-# open the video specified by video_src
-video = cv2.VideoCapture('../media/Problem1/Night Drive - 2689.mp4') 
-start_frame=0
-# move the video to the start frame and adjust the counter
-video.set(1,start_frame)
-count = start_frame
 
 
 
@@ -49,8 +51,8 @@ def adjust_brightness(image,brightness, show_output,write_to_video):
 	bright_image=np.clip(bright_image,0,255)
 	bright_image=np.asarray(bright_image,dtype="uint8")
 	if show_output:
-		cv2.imshow("Original",imutils.resize(frame,600))
-		cv2.imshow("Brighter (+"+str(brightness)+")",imutils.resize(bright_image,600))
+		cv2.imshow("Original",imutils.resize(frame,900))
+		cv2.imshow("Brighter (+"+str(brightness)+")",imutils.resize(bright_image,900))
 	if write_to_video:
 		out.write(bright_image)
 	
@@ -64,8 +66,8 @@ def adjust_contrast(image,contrast,show_output,write_to_video):
 	high_contrast=np.clip(high_contrast,0,255)
 	high_contrast=np.asarray(high_contrast,dtype="uint8")
 	if show_output:
-		cv2.imshow("Original",imutils.resize(frame,600))
-		cv2.imshow("Contrast (*"+str(contrast)+")",imutils.resize(high_contrast,600))
+		cv2.imshow("Original",imutils.resize(frame,900))
+		cv2.imshow("Contrast (*"+str(contrast)+")",imutils.resize(high_contrast,900))
 	if write_to_video:
 		out.write(high_contrast)
 	
@@ -80,13 +82,20 @@ while(video.isOpened()):
 	if ret:
 
 		# Increase Brightness
-		brightness=50
-		# bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
+		brightness=100
+		bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
+		# cv2.imwrite("brightness"+str(brightness)+".jpg",bright_image)
+		# cv2.waitKey(0)
+
+
 		# out.write(bright_image)
 		
 
 		# Increase Contrast
-		high_contrast=adjust_contrast(frame,4,show_output,write_to_video)
+		contrast=6
+		high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
+		# cv2.imwrite("contrast6.jpg",high_contrast)
+		# cv2.imwrite("original.jpg",frame)
 		# out.write(high_contrast)
 
 
@@ -141,6 +150,7 @@ while(video.isOpened()):
 	else:
 		# if ret is False release the video which will exit the loop
 		video.release()
+		print("End of video")
 
 	# if the user presses 'q' release the video which will exit the loop
 	if cv2.waitKey(1) == ord('q'):
