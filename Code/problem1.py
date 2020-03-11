@@ -75,18 +75,21 @@ def adjust_contrast(frame,contrast,show_output,write_to_video):
 
 
 def equalize_Hist(frame,show_output,write_to_video):
-		# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
-		img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+	# https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image
+	img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
 
-		# equalize the histogram of the Y channel
-		img_hsv[:,:,0] = cv2.equalizeHist(img_hsv[:,:,0])
+	# equalize the histogram of the Y channel
+	img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
 
-		# convert the YUV image back to RGB format
-		img_output = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR)
+	# convert the YUV image back to RGB format
+	img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
 
+	if show_output:
 		cv2.imshow('Color input image', frame)
 		cv2.imshow('Histogram equalized', img_output)
 
+	if write_to_video:
+		out.write(img_output)
 
 
 
