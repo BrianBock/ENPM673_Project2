@@ -322,7 +322,11 @@ From the left and right lane coefficients, we generate the points that bound the
 
 Now we use the inverse Homgraphy to warp this overlay into the camera frame. The shape of this overlay is blacked out in a copy of the original frame, and then a bitwise OR combines the lane overlay with the road blacked frame. 
 
-![blacked out road](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/warped_overlay.png)
+![warped overlay](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/warped_overlay.png)
+
+*Frame with road region blacked out*
+
+![blacked out road](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/black_road.png)
 
 *Frame with road region blacked out*
 
@@ -346,36 +350,22 @@ This new frame with the image and lane overlay is then recombined with the origi
 
 ## Turn Prediction
 We take the slope of our lane midpoint line (used to draw the arrows) and compute it's slope. 
-\begin{equation}
-    m=\frac{y_2-y_1}{x_2-x_1}
-\end{equation}
-This slope has a bit of noise and changes a small amount between frames. We experimentally determined a reliable range of $m$ which denote the car is turning right, driving straight, or turning left. Based on this information, we print the slope and car action on the frame, and show it to the screen (Figures \ref{fig:left}, \ref{fig:straight}, \ref{fig:right}). 
 
-\begin{figure}[H]
-\begin{subfigure}{.33\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.95\linewidth]{images/left.jpg}
-  \caption{Car turning left}
-  \label{fig:left}
-\end{subfigure}
-\begin{subfigure}{.33\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.95\linewidth]{images/straight.jpg}
-  \caption{Car driving straight}
-  \label{fig:straight}
-\end{subfigure}
-\begin{subfigure}{.33\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.95\linewidth]{images/right.jpg}
-  \caption{Car turning right}
-  \label{fig:right}
-\end{subfigure}
-\caption{Turning Detection}
-\label{fig:hists}
-\end{figure}
+    m=(y_2-y_1)/(x_2-x_1
+
+This slope has a bit of noise and changes a small amount between frames. We experimentally determined a reliable range of $m$ which denote the car is turning right, driving straight, or turning left. Based on this information, we print the slope and car action on the frame, and show it to the screen:
+
+![left](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/left.jpg)
+
+*Car turning left*
+
+![straight](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/straight.jpg)
+
+*Car driving straight*
+
+![right](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/right.jpg)
+
+*Car turning right*
 
 There is no turning in the first data set, so this method is not implemented with that video. 
 
