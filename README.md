@@ -351,7 +351,7 @@ This new frame with the image and lane overlay is then recombined with the origi
 ## Turn Prediction
 We take the slope of our lane midpoint line (used to draw the arrows) and compute it's slope. 
 
-    m=(y_2-y_1)/(x_2-x_1
+    m=(y_2-y_1)/(x_2-x_1)
 
 This slope has a bit of noise and changes a small amount between frames. We experimentally determined a reliable range of m which denote the car is turning right, driving straight, or turning left. Based on this information, we print the slope and car action on the frame, and show it to the screen:
 
@@ -400,16 +400,16 @@ Since this project is founded on lane line detection, it would be useless on roa
 ## Videos
 **Data Set 1**
 
-Lane Overlay - \url{https://youtu.be/__XLG9Cgs0I}
+Lane Overlay - https://youtu.be/__XLG9Cgs0I
 
 
 **Data Set 2**
 
-Lane Overlay - \url{https://youtu.be/NvaUFfDh_DU}
+Lane Overlay - https://youtu.be/NvaUFfDh_DU
 
-Lane Overlay with turning - \url{https://youtu.be/QNkY0j8-9CY}
+Lane Overlay with turning - https://youtu.be/QNkY0j8-9CY
 
-Pipeline Visualization - \url{https://youtu.be/twkbwrYAsu4}
+Pipeline Visualization - https://youtu.be/twkbwrYAsu4
 
 
 
