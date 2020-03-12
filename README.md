@@ -292,15 +292,15 @@ To find the peaks we considered multiple strategies but eventually decided to us
 
 *Histogram for white pixels in threshed image*
 
-![Histogram](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram_with_peaks.png)
+![Histogram with peaks](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram_with_peaks.png)
 
 *Vertical Lines where peaks were detected*
 
 
 
-Once we have found all the peaks in the histogram we need to determine which peaks is associated with the lane lines. For the first frame we just use the peaks with the highest value. On subsequent frames we test to see if the peaks are within a reasonable threshold of the last frame. Doing this we are able to initialize two booleans, `found_left_lane` and `found_right_lane`. These booleans determine whether we try to generate a new lane line for the current image or just reuse the line from the previous frame. This is helpful for regions like under the bridge where we are unable to see the lane lines for a few frames. This also ensures that the lane lines are not too jittery. This approach does however require the first frame to be correct. Figure \ref{correct_peaks}
+Once we have found all the peaks in the histogram we need to determine which peaks is associated with the lane lines. For the first frame we just use the peaks with the highest value. On subsequent frames we test to see if the peaks are within a reasonable threshold of the last frame. Doing this we are able to initialize two booleans, `found_left_lane` and `found_right_lane`. These booleans determine whether we try to generate a new lane line for the current image or just reuse the line from the previous frame. This is helpful for regions like under the bridge where we are unable to see the lane lines for a few frames. This also ensures that the lane lines are not too jittery. This approach does however require the first frame to be correct.
 
-![Histogram](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram_correct_peaks.png)
+![Histogram with correct peaks](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram_correct_peaks.png)
 
 *Red peak denotes left lane center, Blue peak denotes right lane center*
 
@@ -314,53 +314,31 @@ For simplicity we decided to use only fit a straight line to the points but the 
 
 
 ## Lane Overlay
-From the left and right lane coefficients, we generate the points that bound the lane in the top down squared image. We create a new all black image with the same dimensions as the top-down squared image. Within this image, we use the defined corners to draw a polygon which becomes our green lane overlay. Thick red lines are drawn from the top to bottom corners to bound the lane, becoming our lane lines. The next major step is to add the arrows to the center of our lane. We take the two top points and average them to get a midpoint between them. We repeat this to get a midpoint at the bottom, and then draw a line between these midpoints. This is the line that our arrows will be drawn on. We define the length and spacing of our arrows, and then use \texttt{cv2.arrowedLine} to generate the arrows. We now have a generated lane overlay with lane lines, a green road, and yellow arrows in the world frame (Figure \ref{fig:arrows}).
+From the left and right lane coefficients, we generate the points that bound the lane in the top down squared image. We create a new all black image with the same dimensions as the top-down squared image. Within this image, we use the defined corners to draw a polygon which becomes our green lane overlay. Thick red lines are drawn from the top to bottom corners to bound the lane, becoming our lane lines. The next major step is to add the arrows to the center of our lane. We take the two top points and average them to get a midpoint between them. We repeat this to get a midpoint at the bottom, and then draw a line between these midpoints. This is the line that our arrows will be drawn on. We define the length and spacing of our arrows, and then use `cv2.arrowedLine` to generate the arrows. We now have a generated lane overlay with lane lines, a green road, and yellow arrows in the world frame:
 
-\begin{figure}[H]
-  \centering
-  % include first image
-  \includegraphics[width=.5\linewidth]{images/arrows.jpg}
-  \caption{Overlay generated}
-  \label{fig:arrows}
-\end{figure}
+![overlay](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/arrows.jpg)
+
+*Overlay generated*
 
 Now we use the inverse Homgraphy to warp this overlay into the camera frame. The shape of this overlay is blacked out in a copy of the original frame, and then a bitwise OR combines the lane overlay with the road blacked frame. 
 
-\begin{figure}[H]
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.95\linewidth]{images/warped_overlay.png}
-  \caption{Image with just the warped road overlay}
-  \label{fig:warpedoverlay}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.95\linewidth]{images/black_road.jpg}
-  \caption{Frame with road region blacked out}
-  \label{fig:black_road}
-\end{subfigure}
-\label{fig:histograms}
-\end{figure}
+![blacked out road](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/warped_overlay.png)
 
-This new frame with the image and lane overlay is then recombined with the original frame (using \texttt{cv2.addWeighted} and alpha=0.5) to make the final image with a semi-transparent lane overlay (Figures \ref{fig:fancylanes1}, \ref{fig:fancylanes2})
+*Frame with road region blacked out*
 
 
+This new frame with the image and lane overlay is then recombined with the original frame (using `cv2.addWeighted` and alpha=0.5) to make the final image with a semi-transparent lane overlay:
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=.7\linewidth]{images/Fancylanes1.1.jpg}
-  \caption{1st Frame from Data Set 1 with the lane overlay shown}
-  \label{fig:fancylanes1}
-\end{figure}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=.7\linewidth]{images/Fancylanes2.jpg}
-  \caption{1st Frame from Data Set 2 with the lane overlay shown}
-  \label{fig:fancylanes2}
-\end{figure}
+![final1](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/Fancylanes1.1.jpg)
+
+*1st Frame from Data Set 1 with the lane overlay shown*
+
+
+![final2](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/Fancylanes1.1.jpg)
+
+*1st Frame from Data Set 2 with the lane overlay shown*
+
 
 
 
