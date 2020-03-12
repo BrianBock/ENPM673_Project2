@@ -326,7 +326,7 @@ Now we use the inverse Homgraphy to warp this overlay into the camera frame. The
 
 *Frame with road region blacked out*
 
-![blacked out road](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/black_road.png)
+![blacked out road](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/black_road.jpg)
 
 *Frame with road region blacked out*
 
@@ -375,17 +375,14 @@ There is no turning in the first data set, so this method is not implemented wit
 
 Another possible way to solve the problem of lane detection would be to use Hough lines. Hough lines work by using a voting system. The process is as follows:
 
-\begin{itemize}
-    \item Determine the edges of the image
-    \item Initialize a Hough Matrix $H$ with all values set to zero
-    \item For each edge point in the image find many equations of a line, that passes through the point, in the form $d = xcos(\theta)+ysin(\theta)$.
-    \begin{itemize}
-        \item To do this you should find a new $d$ for each $\theta$ between $0\degree$ and $180\degree$
-        \item Add 1 vote to that index (H[$d$,$\theta$])
-    \end{itemize}{}
-    \item Find the maximum in the $H$ matrix. These indicies of the max are the $d$ and $\theta$ that represents a line that fit the most edges in the image.
-    \item For lane detection you should find the equation that fits the each of the lane lines as maximums within $H$, you will probably need to add some filtering to remove extraneous lines in the image.  
-\end{itemize}
+1. Determine the edges of the image
+1. Initialize a Hough Matrix $H$ with all values set to zero
+1. For each edge point in the image find many equations of a line, that passes through the point, in the form d = xcos(theta)+ysin(theta).
+  1. To do this you should find a new d for each theta between 0 degrees and 180 degree
+  1. Add 1 vote to that index (H[d,theta])
+1. Find the maximum in the $H$ matrix. These indicies of the max are the d and theta$that represents a line that fit the most edges in the image.
+1. For lane detection you should find the equation that fits the each of the lane lines as maximums within H, you will probably need to add some filtering to remove extraneous lines in the image.  
+
 
 
 ## Applicability to Other Videos
