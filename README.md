@@ -306,7 +306,7 @@ Once we have found all the peaks in the histogram we need to determine which pea
 
 
 ## Lane Pixel Candidate
-After the histogram peak detection, we have found a point close to the center of each lane. We then want to gather all the points within some region around the peak and fit a line to the points. We gather points within $\pm$25 pixels of each peak location. These pixels are the lane candidates that we use for line fitting.
+After the histogram peak detection, we have found a point close to the center of each lane. We then want to gather all the points within some region around the peak and fit a line to the points. We gather points within \pm25 pixels of each peak location. These pixels are the lane candidates that we use for line fitting.
 
 
 For simplicity we decided to use only fit a straight line to the points but the method would allow for a more complex curve to be fitted to the data without too much effort. We then use `polyfit` to find the lane line coefficients. Our peak finding already distinguishes which peak is which so we now have an equation for both the left and right lane that fits the points of the HSV threshed image. As mentioned previously if either of the booleans for peak detection are `False`, we just use the line coefficients from the previous frame.  
@@ -353,7 +353,7 @@ We take the slope of our lane midpoint line (used to draw the arrows) and comput
 
     m=(y_2-y_1)/(x_2-x_1
 
-This slope has a bit of noise and changes a small amount between frames. We experimentally determined a reliable range of $m$ which denote the car is turning right, driving straight, or turning left. Based on this information, we print the slope and car action on the frame, and show it to the screen:
+This slope has a bit of noise and changes a small amount between frames. We experimentally determined a reliable range of m which denote the car is turning right, driving straight, or turning left. Based on this information, we print the slope and car action on the frame, and show it to the screen:
 
 ![left](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/left.jpg)
 
@@ -376,11 +376,11 @@ There is no turning in the first data set, so this method is not implemented wit
 Another possible way to solve the problem of lane detection would be to use Hough lines. Hough lines work by using a voting system. The process is as follows:
 
 1. Determine the edges of the image
-1. Initialize a Hough Matrix $H$ with all values set to zero
+1. Initialize a Hough Matrix H with all values set to zero
 1. For each edge point in the image find many equations of a line, that passes through the point, in the form d = xcos(theta)+ysin(theta).
   1. To do this you should find a new d for each theta between 0 degrees and 180 degree
   1. Add 1 vote to that index (H[d,theta])
-1. Find the maximum in the $H$ matrix. These indicies of the max are the d and theta$that represents a line that fit the most edges in the image.
+1. Find the maximum in the H matrix. These indicies of the max are the d and thetathat represents a line that fit the most edges in the image.
 1. For lane detection you should find the equation that fits the each of the lane lines as maximums within H, you will probably need to add some filtering to remove extraneous lines in the image.  
 
 
