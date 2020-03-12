@@ -242,7 +242,7 @@ After we determine a homography matrix we can then warp the image from the norma
 
 
 ## HSV Threshing
-We converted each image from BGR space to HSV space (Figure \ref{fig:hsv}). 
+We converted each image from BGR space to HSV space:
 
 ![top down image](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/top_down_image.jpg)
 
@@ -267,7 +267,7 @@ We then apply a Gaussian blur with a square kernel size of 15 to the binary imag
 *Frame with Gaussian blur*
 
 
-Using a single threshold worked very well for the first data-set where both lane lines were white, but it started to fail for the second video where the left-lane was yellow. We tested with a variety of thresholds but we were never able to find a threshold which worked for the entirety of the video. In order to mitigate this issue we used two thresholds, one for white and one for yellow. Each of the threshold values were used to create a binary image. These binary images were then added together with a `cv2.bitwise\_or`. This way even if one of the threshold catches part of the other lane it is not counted twice.
+Using a single threshold worked very well for the first data-set where both lane lines were white, but it started to fail for the second video where the left-lane was yellow. We tested with a variety of thresholds but we were never able to find a threshold which worked for the entirety of the video. In order to mitigate this issue we used two thresholds, one for white and one for yellow. Each of the threshold values were used to create a binary image. These binary images were then added together with a `cv2.bitwise_or`. This way even if one of the threshold catches part of the other lane it is not counted twice.
 
 ![Yellow Threshold](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/yellow_threshold.png)
 
@@ -286,41 +286,30 @@ Using a single threshold worked very well for the first data-set where both lane
 Now that we have a threshed binary image, we need to determine what pixels are associated with which lane. To do this we found the peaks for a histogram of white pixels in the binary image for each pixel column in the image. The reasoning is that the lane lines from the top down should be fairly straight, therefore there should be peaks in the histogram where vertical lines are. 
 
 
-To find the peaks we considered multiple strategies but eventually decided to use a built in package within scipy named `find\_peaks\_cwt`. This function smooths the histogram then finds anywhere where there are peaks. This function also allows the user to specify the minimum distance between peaks, which allows for us to compensate for when there would be multiple peaks within the region of a lane line.
+To find the peaks we considered multiple strategies but eventually decided to use a built in package within scipy named `find_peaks_cwt`. This function smooths the histogram then finds anywhere where there are peaks. This function also allows the user to specify the minimum distance between peaks, which allows for us to compensate for when there would be multiple peaks within the region of a lane line.
+
+![Histogram](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram.png)
+
+*Histogram for white pixels in threshed image*
+
+![Histogram](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram_with_peaks.png)
+
+*Vertical Lines where peaks were detected*
 
 
-\begin{figure}[H]
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=\linewidth]{images/histogram.png}
-  \caption{Histogram for white pixels in threshed image}
-  \label{fig:histogram}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=\linewidth]{images/histogram_with_peaks.png}
-  \caption{Vertical Lines where peaks were detected}
-  \label{fig:histogram_with_peaks}
-\end{subfigure}
-\label{fig:histograms}
-\end{figure}
 
-Once we have found all the peaks in the histogram we need to determine which peaks is associated with the lane lines. For the first frame we just use the peaks with the highest value. On subsequent frames we test to see if the peaks are within a reasonable threshold of the last frame. Doing this we are able to initialize two booleans, \texttt{found\_left\_lane} and \texttt{found\_right\_lane}. These booleans determine whether we try to generate a new lane line for the current image or just reuse the line from the previous frame. This is helpful for regions like under the bridge where we are unable to see the lane lines for a few frames. This also ensures that the lane lines are not too jittery. This approach does however require the first frame to be correct. Figure \ref{correct_peaks}
+Once we have found all the peaks in the histogram we need to determine which peaks is associated with the lane lines. For the first frame we just use the peaks with the highest value. On subsequent frames we test to see if the peaks are within a reasonable threshold of the last frame. Doing this we are able to initialize two booleans, `found_left_lane` and `found_right_lane`. These booleans determine whether we try to generate a new lane line for the current image or just reuse the line from the previous frame. This is helpful for regions like under the bridge where we are unable to see the lane lines for a few frames. This also ensures that the lane lines are not too jittery. This approach does however require the first frame to be correct. Figure \ref{correct_peaks}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=.5\linewidth]{images/histogram_correct_peaks.png}
-    \caption{Red peak denotes left lane center, Blue peak denotes right lane center}
-    \label{fig:correct_peaks}
-\end{figure}{}
+![Histogram](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/histogram_correct_peaks.png)
+
+*Red peak denotes left lane center, Blue peak denotes right lane center*
+
 
 ## Lane Pixel Candidate
 After the histogram peak detection, we have found a point close to the center of each lane. We then want to gather all the points within some region around the peak and fit a line to the points. We gather points within $\pm$25 pixels of each peak location. These pixels are the lane candidates that we use for line fitting.
 
 
-For simplicity we decided to use only fit a straight line to the points but the method would allow for a more complex curve to be fitted to the data without too much effort. We then use \texttt{polyfit} to find the lane line coefficients. Our peak finding already distinguishes which peak is which so we now have an equation for both the left and right lane that fits the points of the HSV threshed image. As mentioned previously if either of the booleans for peak detection are \texttt{False}, we just use the line coefficients from the previous frame.  
+For simplicity we decided to use only fit a straight line to the points but the method would allow for a more complex curve to be fitted to the data without too much effort. We then use `polyfit` to find the lane line coefficients. Our peak finding already distinguishes which peak is which so we now have an equation for both the left and right lane that fits the points of the HSV threshed image. As mentioned previously if either of the booleans for peak detection are `False`, we just use the line coefficients from the previous frame.  
 
 
 
