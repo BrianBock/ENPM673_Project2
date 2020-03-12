@@ -119,12 +119,12 @@ Contrast is a scalar piece-wise multiplication with the image matrix. It is susc
 
 
 
-At higher contrast levels, we start getting a noisier, redder sky, and washed out road signs (Figure \ref{fig:contrast9}). Car headlights also become excessively bright (Figure \ref{fig:contrast9headlights}). This would be detrimental to the performance of an autonomous reliant on this video for navigation, as this headlight sun obstructs a significant portion of the field of view and misrepresents the size of the offending car.
+At higher contrast levels, we start getting a noisier, redder sky, and washed out road signs. Car headlights also become excessively bright:
 
-![overcontrasted headlights](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/contrast9headlights.jpg)
+![overcontrasted headlights](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/contrast9_headlight.jpg)
 *Over-contrasted (\*9) frame with overbright car headlights}*
 
-
+This would be detrimental to the performance of an autonomous reliant on this video for navigation, as this headlight sun obstructs a significant portion of the field of view and misrepresents the size of the offending car.
 
 
 
