@@ -9,6 +9,11 @@ import time
 
 write_to_video=False
 show_output=True
+change_brightness=True
+change_contrast=False
+change_histYUV=False
+change_histHSV=False
+change_gamma=False
 
 
 # open the video specified by video_src
@@ -127,37 +132,43 @@ while(video.isOpened()):
 	ret, frame = video.read() # ret is false if the video cannot be read
 	if ret:
 
-		# Increase Brightness
-		brightness=100
-		# bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
-		# cv2.imwrite("brightness"+str(brightness)+".jpg",bright_image)
-		# cv2.waitKey(0)
+	# Increase Brightness
+		if change_brightness:
+
+			brightness=100
+			bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
+			# cv2.imwrite("brightness"+str(brightness)+".jpg",bright_image)
+			# cv2.waitKey(0)
 
 
 		# out.write(bright_image)
 		
 
-		# Increase Contrast
-		contrast=9
-		# high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
-		# cv2.imwrite("contrast"+str(contrast)+".jpg",high_contrast)
-		# cv2.imwrite("original.jpg",frame)
-		# out.write(high_contrast)
-		# cv2.waitKey(0)
+	# Increase Contrast
+		if change_contrast:
+			contrast=9
+			high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
+			# cv2.imwrite("contrast"+str(contrast)+".jpg",high_contrast)
+			# cv2.imwrite("original.jpg",frame)
+			# out.write(high_contrast)
+			# cv2.waitKey(0)
 
-		# Equalize Histogram in YUV Space
-		# hist_eq=equalize_Hist_YUV(frame,show_output,write_to_video)
-		# hist_eq=equalize_Hist_HSV(frame,show_output,write_to_video)
+	# Equalize Histogram in YUV Space
+		if change_histYUV:
+			hist_eq=equalize_Hist_YUV(frame,show_output,write_to_video)
+
+	# Equalize Histogram in HSV Space
+		if change_histHSV:
+			hist_eq=equalize_Hist_HSV(frame,show_output,write_to_video)
 
 		# cv2.imwrite("HisteqHSV.jpg",hist_eq)
 		# cv2.waitKey(0)
 
-
-		
-
-		gamma = 2
-		new_gamma = adjust_gamma(frame, gamma,show_output,write_to_video)
-		cv2.imshow("Gamma "+str(gamma), new_gamma)
+	# Adjust Gamma
+		if change_gamma:
+			gamma = 2
+			new_gamma = adjust_gamma(frame, gamma,show_output,write_to_video)
+			# cv2.imshow("Gamma "+str(gamma), new_gamma)
 		# cv2.imwrite("Gamma"+str(gamma)+".jpg", new_gamma)
 		# cv2.waitKey(0)
 
