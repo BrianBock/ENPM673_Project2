@@ -163,7 +163,7 @@ https://youtu.be/53uUhmN6sZA
 
 We can also try converting the image to the HSV color space, which similarly has a dedicated channel for intensity (V). The result has largely purple skewed color and is still a noisy mess: 
 
-![HSV equalization](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/HistHSV.jpg)
+![HSV equalization](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/HisteqHSV.jpg)
 *Frame with histogram equalization in the V (HSV) channel*
 
 https://youtu.be/FYoVCjUv1X0
