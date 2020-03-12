@@ -15,6 +15,10 @@ change_histYUV=False
 change_histHSV=False
 change_gamma=False
 
+brightness=100 # int between 0-255
+contrast=9 # int between 0-15
+gamma = 2
+
 
 # open the video specified by video_src
 video = cv2.VideoCapture('../media/Problem1/Night Drive - 2689.mp4')
@@ -134,8 +138,6 @@ while(video.isOpened()):
 
 	# Increase Brightness
 		if change_brightness:
-
-			brightness=100
 			bright_image=adjust_brightness(frame,brightness,show_output,write_to_video)
 			# cv2.imwrite("brightness"+str(brightness)+".jpg",bright_image)
 			# cv2.waitKey(0)
@@ -146,7 +148,6 @@ while(video.isOpened()):
 
 	# Increase Contrast
 		if change_contrast:
-			contrast=9
 			high_contrast=adjust_contrast(frame,contrast,show_output,write_to_video)
 			# cv2.imwrite("contrast"+str(contrast)+".jpg",high_contrast)
 			# cv2.imwrite("original.jpg",frame)
@@ -166,7 +167,6 @@ while(video.isOpened()):
 
 	# Adjust Gamma
 		if change_gamma:
-			gamma = 2
 			new_gamma = adjust_gamma(frame, gamma,show_output,write_to_video)
 			# cv2.imshow("Gamma "+str(gamma), new_gamma)
 		# cv2.imwrite("Gamma"+str(gamma)+".jpg", new_gamma)
