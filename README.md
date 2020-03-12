@@ -232,9 +232,12 @@ We have written a function that computes this homography but for speed considera
 After we determine a homography matrix we can then warp the image from the normal camera coordinate system into the top down view. The resulting top down image is:
 
 ![data1](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/top_down_ds1.png)
+
 *Data set 1*
 
+
 ![data2](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/top_down_ds2.png)
+
 *Data set 2*
 
 
@@ -242,87 +245,49 @@ After we determine a homography matrix we can then warp the image from the norma
 We converted each image from BGR space to HSV space (Figure \ref{fig:hsv}). 
 
 ![top down image](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/top_down_image.jpg)
+
 *Original Warped Road Frame*
 
 ![HSV image](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/HSV_1.jpg)
+
 *Frame in HSV color space*
 
-The HSV color space is more robust and consistent under varied lighting conditions \cite{hsv} \cite{mitchell3} We experimentally determined the ideal HSV max and min threshold values that made just the lane lines clearly visible in the frame and eliminated most undesired image elements. We used these values to convert the HSV image into a binary image (Figure \ref{fig:binthresh}). We then apply a Gaussian blur with a square kernel size of 15 to the binary image (Figure \ref{fig:gaussianblur}). This is necessary to reduce noise that would otherwise make edge detection difficult. 
+The HSV color space is more robust and consistent under varied lighting conditions (https://www.learnopencv.com/color-spaces-in-opencv-cpp-python/). We experimentally determined the ideal HSV max and min threshold values that made just the lane lines clearly visible in the frame and eliminated most undesired image elements. We used these values to convert the HSV image into a binary image. 
 
-\begin{figure}[H]
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.8\linewidth]{images/top_down_image.jpg}
-  \caption{Original Warped Road Frame}
-  \label{fig:original}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.8\linewidth]{images/HSV_1.jpg}
-  \caption{Frame in HSV color space}
-  \label{fig:hsv}
-\end{subfigure}
-\caption{Example photo showing the HSV conversion}
-\label{fig:orig2hsv}
-\end{figure}
+![HSV binary image](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/hsv_binary_image.jpg)
+
+*Binary frame threshed from HSV*
 
 
-\begin{figure}[H]
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.8\linewidth]{images/hsv_binary_image.jpg}
-  \caption{Binary frame threshed from HSV}
-  \label{fig:binthresh}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.8\linewidth]{images/GaussianBlur.jpg}
-  \caption{Binary frame with Gaussian blur}
-  \label{fig:gaussianblur}
-\end{subfigure}
-\caption{Example photo showing the result of a binary threshing and Gaussian blur}
-\label{fig:bin_gaus}
-\end{figure}
 
-Using a single threshold worked very well for the first data-set where both lane lines were white, but it started to fail for the second video where the left-lane was yellow. We tested with a variety of thresholds but we were never able to find a threshold which worked for the entirety of the video. In order to mitigate this issue we used two thresholds, one for white and one for yellow. Each of the threshold values were used to create a binary image. These binary images were then added together with a \texttt{cv2.bitwise\_or}. This way even if one of the threshold catches part of the other lane it is not counted twice. Figure 
+We then apply a Gaussian blur with a square kernel size of 15 to the binary image. This is necessary to reduce noise that would otherwise make edge detection difficult. 
+
+![Blurred image](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/GaussianBlur.jpg)
+
+*Frame with Gaussian blur*
 
 
-\begin{figure}[H]
-\begin{subfigure}{.3\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.9\linewidth]{images/yellow_threshold.png}
-  \caption{Yellow Threshold}
-  \label{fig:binthresh}
-\end{subfigure}
-\begin{subfigure}{.3\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.9\linewidth]{images/white_threshold.png}
-  \caption{White Threshold}
-  \label{fig:gaussianblur}
-\end{subfigure}
-\begin{subfigure}{.3\textwidth}
-  \centering
-  % include 3rd image
-  \includegraphics[width=.9\linewidth]{images/added_threshold.png}
-  \caption{Combination of the two}
-  \label{fig:gaussianblur}
-\end{subfigure}
-\caption{Results of using multiple threshold values}
-\label{fig:bin_gaus}
-\end{figure}
+Using a single threshold worked very well for the first data-set where both lane lines were white, but it started to fail for the second video where the left-lane was yellow. We tested with a variety of thresholds but we were never able to find a threshold which worked for the entirety of the video. In order to mitigate this issue we used two thresholds, one for white and one for yellow. Each of the threshold values were used to create a binary image. These binary images were then added together with a `cv2.bitwise\_or`. This way even if one of the threshold catches part of the other lane it is not counted twice.
+
+![Yellow Threshold](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/yellow_threshold.png)
+
+*Yellow Threshold*
+
+![White Threshold](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/white_threshold.png)
+
+*White Threshold*
+
+![Combo Threshold](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/added_threshold.png)
+
+*Combination of the two thresholds*
+
 
 ## Histogram Peak Finding
 Now that we have a threshed binary image, we need to determine what pixels are associated with which lane. To do this we found the peaks for a histogram of white pixels in the binary image for each pixel column in the image. The reasoning is that the lane lines from the top down should be fairly straight, therefore there should be peaks in the histogram where vertical lines are. 
-\newline
 
-To find the peaks we considered multiple strategies but eventually decided to use a built in package within scipy named \texttt{find\_peaks\_cwt}. This function smooths the histogram then finds anywhere where there are peaks. This function also allows the user to specify the minimum distance between peaks, which allows for us to compensate for when there would be multiple peaks within the region of a lane line.
-\newline
+
+To find the peaks we considered multiple strategies but eventually decided to use a built in package within scipy named `find\_peaks\_cwt`. This function smooths the histogram then finds anywhere where there are peaks. This function also allows the user to specify the minimum distance between peaks, which allows for us to compensate for when there would be multiple peaks within the region of a lane line.
+
 
 \begin{figure}[H]
 \begin{subfigure}{.5\textwidth}
@@ -353,7 +318,7 @@ Once we have found all the peaks in the histogram we need to determine which pea
 
 ## Lane Pixel Candidate
 After the histogram peak detection, we have found a point close to the center of each lane. We then want to gather all the points within some region around the peak and fit a line to the points. We gather points within $\pm$25 pixels of each peak location. These pixels are the lane candidates that we use for line fitting.
-\newline
+
 
 For simplicity we decided to use only fit a straight line to the points but the method would allow for a more complex curve to be fitted to the data without too much effort. We then use \texttt{polyfit} to find the lane line coefficients. Our peak finding already distinguishes which peak is which so we now have an equation for both the left and right lane that fits the points of the HSV threshed image. As mentioned previously if either of the booleans for peak detection are \texttt{False}, we just use the line coefficients from the previous frame.  
 
@@ -468,13 +433,13 @@ Another possible way to solve the problem of lane detection would be to use Houg
 
 ## Applicability to Other Videos
 We were able to apply our solution from the first data set of this project to the second with minimal modification (only adjusted the HSV threshold and road bounding points). This increases our confidence in the applicability of our solution to other videos. The techniques used in this project should be work with minimal modification on any fixed camera driving on a road with the following conditions:
-\newline
+
 The road must be reasonably well lit. This approach would probably not work as well at night, unless the lane lines were illuminated or highly reflective. In any condition where the lane lines are clearly visible, this technique should work. The HSV thresholds might need to be adjusted to compensate for drastically different lighting conditions.
-\newline
+
 Using multiple thresholds, lane lines can be yellow or white. These are the most common colors for lane lines, so this should have wide applicability. In order to capture other lane line colors, you could add another HSV threshold, which is an easy task.
-\newline
+
 The road points would need to be reconfigured for any new camera configuration or vehicle, but if chosen well they should be applicable for any driving that car does (given the above conditions). Since the program analyzes histogram peaks and not position, it does not care about the lane width. The program could therefore not restricted to roads of a comparable lane width, and should handle roads with a variety of lane widths. Lanes are often wider on highways and parkways than they are on local roads. It is important to define the road region points on a wide lane, and to allow for some buffer width. If the points were defined on a narrow road, regions of a wider road (and the lane lines) would be lost. 
-\newline
+
 Since this project is founded on lane line detection, it would be useless on roads without any lane lines. 
 
 
