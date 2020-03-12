@@ -56,7 +56,7 @@ To run Part 2, run `python3 lanedetection.py` in Terminal.
 
 # Part 1 - Enhancing a Dark Video
 
-The task for this section was to improve the lightning and visibility in the provided video. The video is shot at night, which makes it dark. You can view the original video here: \url{https://youtu.be/s23jnVK4rHs}. Unlike the videos in Part \ref{sec:lanedetection} which use a rigidly mounted camera, the video in this part is shot with a hand controlled camera. Throughout the sequence, the camera moves and changes the view. To compound the difficulty,  most of the video is both compressed and very out of focus. The lack of focus makes it nearly impossible to know if a smoothing kernel is over-applied - the video is blurry regardless. The compression shows up in interesting ways later; since most of the video is dark, large clusters of pixels are stored as the same color, and these clusters become readily apparent with a variety of image manipulations. 
+The task for this section was to improve the lightning and visibility in the provided video. The video is shot at night, which makes it dark. You can view the original video here: \url{https://youtu.be/s23jnVK4rHs. Unlike the videos in Part \ref{sec:lanedetection which use a rigidly mounted camera, the video in this part is shot with a hand controlled camera. Throughout the sequence, the camera moves and changes the view. To compound the difficulty,  most of the video is both compressed and very out of focus. The lack of focus makes it nearly impossible to know if a smoothing kernel is over-applied - the video is blurry regardless. The compression shows up in interesting ways later; since most of the video is dark, large clusters of pixels are stored as the same color, and these clusters become readily apparent with a variety of image manipulations. 
 
 
 
@@ -122,7 +122,7 @@ Contrast is a scalar piece-wise multiplication with the image matrix. It is susc
 At higher contrast levels, we start getting a noisier, redder sky, and washed out road signs. Car headlights also become excessively bright:
 
 ![overcontrasted headlights](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/contrast9_headlight.jpg)
-*Over-contrasted (\*9) frame with overbright car headlights}*
+*Over-contrasted (\*9) frame with overbright car headlights*
 
 This would be detrimental to the performance of an autonomous reliant on this video for navigation, as this headlight sun obstructs a significant portion of the field of view and misrepresents the size of the offending car.
 
@@ -205,7 +205,7 @@ The goal of this assignment is to detect the lane lines from a dash cam of a car
 
 In the first data set, the video to analyze is comprised of 302 individual frames saved as images. The second data set is a 16 second video. With the exception of reading the video in, the steps to detect the lane lines in both of these data sets are very similar. In both cases, we treat the video as a series of independent frames.
 
-## Overview of image processing pipeline}
+## Overview of image processing pipeline
 
 1. Import the next frame
 1. Use homography to warp the image to create a top-down view of the road
@@ -219,9 +219,9 @@ In the first data set, the video to analyze is comprised of 302 individual frame
 
 
 
-## Top Down Image}
+## Top Down Image
 
-In order to generate a homography matrix that will allow us to view the road as if we were looking from above we need to pick eight points. Four from the original source image and four where those points will map onto the destination image which in this case is the top down image. The first four points we pick by selecting two points just in front of the car on the lane and another two far ahead of the car on the lane. Each set of points share the same y-position in the image. In order to ensure that the top down image contains both lanes even if the car shifts position in the lane, we map the points not to the edge of the destination but instead 20\% in on each side. Figure \ref{fig:point-mapping} shows how the points map between the two images.
+In order to generate a homography matrix that will allow us to view the road as if we were looking from above we need to pick eight points. Four from the original source image and four where those points will map onto the destination image which in this case is the top down image. The first four points we pick by selecting two points just in front of the car on the lane and another two far ahead of the car on the lane. Each set of points share the same y-position in the image. In order to ensure that the top down image contains both lanes even if the car shifts position in the lane, we map the points not to the edge of the destination but instead 20\% in on each side. Figure \ref{fig:point-mapping shows how the points map between the two images.
 
 ![point mapping](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/mapping.png)
 *Point mapping between original and top down view*
