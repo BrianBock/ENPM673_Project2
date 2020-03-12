@@ -23,12 +23,19 @@ There are several program parameters that are easily adjustable via a boolean to
 
 There are several different modes you have available for improving the video. If `write_to_video=True`, you should only have one of these set to `True`. If more than one mode is set to true, each frame of the video will alternate between modes, producing an undesirable flashing effect. 
 
-`change_brightnes`=True
-`change_contrast`=False
-`change_histYUV`=False
-`change_histHSV`=False
-`change_gamma`=False
+`change_brightnes` toggles a brightness adjustment on the video
 
+`change_contrast` toggles a contrast adjustment on the video
+
+`change_histYUV` toggles a histogram equalization in the Y channel of the video converted to YUV space
+
+`change_histHSV` toggles a histogram equalization in the V channel of the video converted to HSV space
+
+`change_gamma` toggles a gamma adjustment on the video
+
+You have the option to change the values for the brightness, contrast, and gamma. The preset values produced favorable results. 
+
+To run Part 1, run `python3 problem1.py` in Terminal. 
 
 
 ### Part 2
