@@ -42,7 +42,7 @@ class Road:
 
     def get_frame(self,frame_num):
         if self.data_set==1:
-            filepath="media/Problem2/data_1/data/"
+            filepath="../media/Problem2/data_1/data/"
             imagepath=filepath+('0000000000'+str(frame_num))[-10:]+'.png'
             frame=cv2.imread(imagepath)
             if frame is None:
@@ -51,7 +51,7 @@ class Road:
             self.frame=frame
 
         elif self.data_set==2:
-            videopath="media/Problem2/data_2/challenge_video.mp4"
+            videopath="../media/Problem2/data_2/challenge_video.mp4"
             video = cv2.VideoCapture(videopath)
             # move the video to the start frame and adjust the counter
             video.set(1,frame_num)
@@ -321,8 +321,8 @@ class Road:
         contour = np.array(corners, dtype=np.int32)
         lane_overlay_img = self.frame.copy()
         cv2.drawContours(lane_overlay_img,[contour],-1,(0,0,0),-1)
-        # cv2.imshow("Lane Overlay",lane_overlay_img)
-        # cv2.waitKey(0)
+        cv2.imshow("Lane Overlay",lane_overlay_img)
+        cv2.waitKey(0)
 
         lane_overlay_img = cv2.bitwise_or(lane_overlay_img,warped_lane)
         # cv2.imshow("Lane Overlay",lane_overlay_img)
