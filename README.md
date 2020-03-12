@@ -339,7 +339,7 @@ This new frame with the image and lane overlay is then recombined with the origi
 *1st Frame from Data Set 1 with the lane overlay shown*
 
 
-![final2](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/Fancylanes1.1.jpg)
+![final2](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part2/Fancylanes2.jpg)
 
 *1st Frame from Data Set 2 with the lane overlay shown*
 
