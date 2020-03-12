@@ -135,44 +135,14 @@ We next explore gamma correction based on the work done by Adrian Rosebrock (htt
 
 Gamma=2 - https://youtu.be/zg0S08nHYJg
 
-![Gamma 1.5](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/gamma1.5.jpg)
+![Gamma 1.5](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/Gamma1.5.jpg)
 *Gamma 1.5*
 
+![Gamma 2.5](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/Gamma2.5.jpg)
+*Gamma 2.5*
 
-\begin{figure}[H]
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.95\linewidth]{images/original.jpg}
-  \caption{Original frame}
-  \label{fig:ogframe_gamma}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.95\linewidth]{images/Gamma1.5.jpg}
-  \caption{Gamma=1.5}
-  \label{fig:gamma1.5}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include first image
-  \includegraphics[width=.95\linewidth]{images/Gamma2.5.jpg}
-  \caption{Gamma=2.5}
-  \label{fig:gamma2.5}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  % include 2nd image
-  \includegraphics[width=.95\linewidth]{images/Gamma5.jpg}
-  \caption{Gamma=5}
-  \label{fig:gamma5}
-\end{subfigure}
-\caption{Frames with different gamma correction}
-\label{fig:gamma}
-\end{figure}
-
-
+![Gamma 5](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/Gamma5.jpg)
+*Gamma 5*
 
 
 
@@ -182,27 +152,27 @@ Gamma=2 - https://youtu.be/zg0S08nHYJg
 
 
 ## Histogram Equalization
-We attempted histogram equalization on the image. Histogram equalization on an RGB/BGR image would distort the colors, which is problematic for an autonomous car (which needs to know colors for traffic lights, brake lights, road signs, etc.). We convert the image to YUV color space, which has a dedicated channel for illumination (Y). We equalize the histogram of the Y channel and then convert the image back to BGR space. \cite{yuvhist}\cite{hsvhist} The result looks like an old TV (Figure \ref{fig:histeqYUV}): \url{https://youtu.be/53uUhmN6sZA}
+We attempted histogram equalization on the image. Histogram equalization on an RGB/BGR image would distort the colors, which is problematic for an autonomous car (which needs to know colors for traffic lights, brake lights, road signs, etc.). We convert the image to YUV color space, which has a dedicated channel for illumination (Y). We equalize the histogram of the Y channel and then convert the image back to BGR space. (https://stackoverflow.com/questions/31998428/opencv-python-equalizehist-colored-image)(https://stackoverflow.com/questions/17185151/how-to-obtain-a-single-channel-value-image-from-hsv-image-in-opencv-2-1) The result looks like an old TV:
 
 
-\begin{figure}[H]
-  \centering
-  % include first image
-  \includegraphics[width=.8\linewidth]{images/Histeq.jpg}
-  \caption{Frame with histogram equalization in the Y (YUV) channel}
-  \label{fig:histeqYUV}
-\end{figure}
+![YUV equalization](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/HistYUV.jpg)
+*Histogram Equalization in the Y channel of the YUV image*
 
-We can also try converting the image to the HSV color space, which similarly has a dedicated channel for intensity (V). The result has largely purple skewed color and is still a noisy mess (Figure \ref{fig:histeqHSV}): \url{https://youtu.be/FYoVCjUv1X0}
+https://youtu.be/53uUhmN6sZA
 
-\begin{figure}[H]
-  \centering
-  % include first image
-  \includegraphics[width=.8\linewidth]{images/HisteqHSV.jpg}
-  \caption{Frame with histogram equalization in the V (HSV) channel}
-  \label{fig:histeqHSV}
-\end{figure}
 
+We can also try converting the image to the HSV color space, which similarly has a dedicated channel for intensity (V). The result has largely purple skewed color and is still a noisy mess: 
+
+![HSV equalization](https://github.com/BrianBock/ENPM673_Project2/blob/master/output/Part%201/HistHSV.jpg)
+*Frame with histogram equalization in the V (HSV) channel*
+
+https://youtu.be/FYoVCjUv1X0
 
 
 # Part 2 - Lane Detection on 2 Videos
+
+
+
+
+
+
